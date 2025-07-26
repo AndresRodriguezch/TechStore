@@ -47,6 +47,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
         <div className="max-w-4xl mx-auto p-4 md:p-6">
+             <Skeleton className="h-10 w-32 mb-4" />
             <Card>
                 <div className="grid md:grid-cols-2 gap-8">
                     <CardHeader>
@@ -74,6 +75,11 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
+      <div className="mb-4">
+        <Button variant="outline" onClick={() => router.back()}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+        </Button>
+      </div>
       <Card>
         <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-center">
           <CardHeader className="p-0 flex items-center justify-center">
@@ -105,9 +111,6 @@ export default function ProductDetailPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="flex-1" disabled={product.stock === 0}>
                 Añadir al Carrito
-              </Button>
-               <Button size="lg" variant="outline" className="flex-1" onClick={() => router.back()}>
-                <ArrowLeft className="mr-2 h-4 w-4" /> Volver
               </Button>
             </div>
           </CardContent>
