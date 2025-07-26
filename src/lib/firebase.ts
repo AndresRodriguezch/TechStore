@@ -7,7 +7,7 @@ const firebaseConfig = {
   projectId: "e-commerce-et7bs",
   appId: "1:90292158368:web:f0d15cc8a604ae8bdbaec5",
   storageBucket: "e-commerce-et7bs.firebasestorage.app",
-  apiKey: "AIzaSyBF6KbYoKy3d7obk8Mmy81fdxTke_5HVtA",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "e-commerce-et7bs.firebaseapp.com",
   messagingSenderId: "90292158368",
 };
