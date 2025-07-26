@@ -3,13 +3,14 @@ export interface Customer {
   name: string;
   email: string;
   phone: string;
-  address: {
+  address?: {
     street: string;
     city: string;
     state:string;
     zip: string;
   };
-  company: string;
+  company?: string;
+  role?: 'admin' | 'user';
 }
 
 export interface InvoiceItem {

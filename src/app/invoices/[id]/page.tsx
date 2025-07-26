@@ -34,13 +34,13 @@ export default function InvoiceDetailPage() {
           const invoiceData = { id: invoiceSnap.id, ...invoiceSnap.data() } as Invoice;
           setInvoice(invoiceData);
 
-          const customerRef = doc(db, "customers", invoiceData.customerId);
-          const customerSnap = await getDoc(customerRef);
+          const userRef = doc(db, "users", invoiceData.customerId);
+          const userSnap = await getDoc(userRef);
 
-          if (customerSnap.exists()) {
-            setCustomer({ id: customerSnap.id, ...customerSnap.data() } as Customer);
+          if (userSnap.exists()) {
+            setCustomer({ id: userSnap.id, ...userSnap.data() } as Customer);
           } else {
-            console.error("No such customer!");
+            console.error("No such customer (user)!");
           }
         } else {
           console.error("No such invoice!");
@@ -122,8 +122,12 @@ export default function InvoiceDetailPage() {
             <div>
               <h3 className="font-semibold mb-1">Facturar a:</h3>
               <p className="font-medium">{customer.name}</p>
-              <p className="text-sm text-muted-foreground">{customer.address.street}</p>
-              <p className="text-sm text-muted-foreground">{customer.address.city}, {customer.address.state} {customer.address.zip}</p>
+              {customer.address && (
+                <>
+                <p className="text-sm text-muted-foreground">{customer.address.street}</p>
+                <p className="text-sm text-muted-foreground">{customer.address.city}, {customer.address.country}</p>
+                </>
+              )}
               <p className="text-sm text-muted-foreground">{customer.email}</p>
             </div>
             <div className="text-right">

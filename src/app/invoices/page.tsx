@@ -37,20 +37,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [invoicesSnapshot, customersSnapshot] = await Promise.all([
+        const [invoicesSnapshot, usersSnapshot] = await Promise.all([
           getDocs(collection(db, "invoices")),
-          getDocs(collection(db, "customers")),
+          getDocs(collection(db, "users")),
         ]);
         const invoicesData = invoicesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Invoice));
-        const customersData = customersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
+        const usersData = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
         setInvoices(invoicesData);
-        setCustomers(customersData);
+        setUsers(usersData);
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
@@ -60,8 +60,8 @@ export default function InvoicesPage() {
     fetchData();
   }, []);
 
-  const getCustomerById = (id: string) => {
-    return customers.find((customer) => customer.id === id);
+  const getUserById = (id: string) => {
+    return users.find((user) => user.id === id);
   }
 
   return (
@@ -110,7 +110,7 @@ export default function InvoicesPage() {
               ))
             ) : (
               invoices.map((invoice) => {
-                const customer = getCustomerById(invoice.customerId);
+                const user = getUserById(invoice.customerId);
                 const subtotal = invoice.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
                 const taxAmount = subtotal * invoice.taxRate;
                 const total = subtotal + taxAmount - invoice.discount;
@@ -122,7 +122,7 @@ export default function InvoicesPage() {
                         {invoice.invoiceNumber}
                       </Link>
                     </TableCell>
-                    <TableCell>{customer?.name}</TableCell>
+                    <TableCell>{user?.name}</TableCell>
                     <TableCell className="hidden md:table-cell">
                       {format(new Date(invoice.dueDate), "PPP", { locale: es })}
                     </TableCell>
