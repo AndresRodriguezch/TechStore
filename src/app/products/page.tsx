@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Product } from "@/lib/types";
 import { db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -28,6 +32,19 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
+  const categories = useMemo(() => {
+    const allCategories = products.map((product) => product.category);
+    return ['all', ...Array.from(new Set(allCategories))];
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, searchTerm, selectedCategory]);
+
   return (
     <div className="flex flex-col gap-6">
       <header className="text-center">
@@ -36,6 +53,29 @@ export default function ProductsPage() {
           Explora nuestro catálogo completo de productos tecnológicos.
         </p>
       </header>
+
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Input
+          type="text"
+          placeholder="Buscar productos por nombre..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="flex-grow"
+        />
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Filtrar por categoría" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category === 'all' ? 'Todas las Categorías' : category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {loading ? (
           Array.from({ length: 8 }).map((_, index) => (
@@ -55,7 +95,7 @@ export default function ProductsPage() {
             </Card>
           ))
         ) : (
-          products.map((product) => (
+          filteredProducts.map((product) => (
             <Card key={product.id} className="flex flex-col overflow-hidden">
               <CardHeader className="p-0">
                 <Image
@@ -84,6 +124,11 @@ export default function ProductsPage() {
           ))
         )}
       </div>
+      {!loading && filteredProducts.length === 0 && (
+         <div className="text-center col-span-full py-12">
+            <p className="text-muted-foreground">No se encontraron productos que coincidan con tu búsqueda.</p>
+        </div>
+      )}
     </div>
   );
 }
