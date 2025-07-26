@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { PlusCircle, MoreHorizontal } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -14,27 +15,59 @@ import { Input } from "@/components/ui/input";
 import { db } from "@/lib/firebase";
 import { Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/auth-context";
+
+function AccessDenied() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Acceso Denegado</CardTitle>
+        <CardDescription>
+          No tienes los permisos necesarios para ver esta página.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p>Por favor, contacta a un administrador si crees que esto es un error.</p>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function CustomersPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "customers"));
-        const customersData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
-        setCustomers(customersData);
-      } catch (error) {
-        console.error("Error fetching customers: ", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!authLoading && user?.role !== 'admin') {
+      return;
+    }
+    
+    if (user) {
+      const fetchCustomers = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(db, "customers"));
+          const customersData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
+          setCustomers(customersData);
+        } catch (error) {
+          console.error("Error fetching customers: ", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCustomers();
+    }
+  }, [user, authLoading, router]);
 
-    fetchCustomers();
-  }, []);
+  if (authLoading) {
+    return <p>Cargando...</p>;
+  }
+
+  if (!user || user.role !== 'admin') {
+    return <AccessDenied />;
+  }
 
   return (
     <Card>

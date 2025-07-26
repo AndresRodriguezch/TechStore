@@ -16,7 +16,7 @@ const navItems = [
   { href: "/products", label: "Productos", icon: Package, tooltip: "Productos", auth: false },
   { href: "/cart", label: "Carrito", icon: ShoppingCart, tooltip: "Carrito", auth: false },
   { href: "/invoices", label: "Facturas", icon: FileText, tooltip: "Facturas", auth: true },
-  { href: "/customers", label: "Clientes", icon: Users, tooltip: "Clientes", auth: true },
+  { href: "/customers", label: "Clientes", icon: Users, tooltip: "Clientes", auth: true, adminOnly: true },
 ];
 
 const authNavItems = [
@@ -26,27 +26,34 @@ const authNavItems = [
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+
+  const isVisible = (item: typeof navItems[0]) => {
+    if (!item.auth) return true; // Public item
+    if (!isAuthenticated) return false; // Auth-only item, but user is not logged in
+    if (item.adminOnly && user?.role !== 'admin') return false; // Admin-only item, but user is not admin
+    return true; // Auth item and user is logged in (and has rights if it's admin only)
+  }
 
   return (
     <SidebarMenu>
-      {navItems.map((item) => (
-         (!item.auth || isAuthenticated) && (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname === item.href}
-                className="w-full justify-start"
-                tooltip={item.tooltip}
-              >
-                <Link href={item.href}>
-                  <item.icon className="mr-3 h-5 w-5" />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )
-      ))}
+      {navItems.map((item) => 
+        isVisible(item) && (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === item.href}
+              className="w-full justify-start"
+              tooltip={item.tooltip}
+            >
+              <Link href={item.href}>
+                <item.icon className="mr-3 h-5 w-5" />
+                <span>{item.label}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )
+      )}
        {!isAuthenticated && authNavItems.map((item) => (
         <SidebarMenuItem key={item.href}>
           <SidebarMenuButton
