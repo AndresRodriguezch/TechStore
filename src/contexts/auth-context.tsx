@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
        console.error("Firebase Auth Error:", error.code, error.message);
        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        return { success: false, message: 'Credenciales inválidas.' };
+        return { success: false, message: 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.' };
       }
       return { success: false, message: 'Ocurrió un error al iniciar sesión.' };
     }
