@@ -7,6 +7,7 @@ import { SidebarNav } from '@/components/sidebar-nav';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Gem, PanelLeft, LogOut, User } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
 
 export default function AppContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, logout } = useAuth();
@@ -40,6 +41,7 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
           <SidebarNav />
         </SidebarContent>
         <SidebarFooter className="p-2 flex flex-col gap-2">
+           <ThemeToggle />
            <div className="hidden md:flex justify-start group-data-[collapsible=icon]:justify-center">
             <SidebarTrigger>
               <PanelLeft />
