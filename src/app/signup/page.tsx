@@ -43,6 +43,9 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Assign role based on email
+      const userRole = email === 'admin@pi.edu.co' ? 'admin' : 'user';
+
       // Create a user document in Firestore
       await setDoc(doc(db, "users", user.uid), {
         name: name,
@@ -53,7 +56,7 @@ export default function SignupPage() {
           city: city,
           country: country,
         },
-        role: 'user' // Default role
+        role: userRole
       });
       
       toast({
@@ -190,4 +193,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
