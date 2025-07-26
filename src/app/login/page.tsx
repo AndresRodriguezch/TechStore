@@ -68,9 +68,14 @@ export default function LoginPage() {
               />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">
-              Iniciar Sesión
-            </Button>
+            <div className="grid gap-2">
+              <Button type="submit" className="w-full">
+                Iniciar Sesión
+              </Button>
+              <Button variant="outline" type="button" className="w-full" onClick={() => router.back()}>
+                Volver
+              </Button>
+            </div>
           </form>
           <div className="mt-4 text-center text-sm">
             ¿No tienes una cuenta?{' '}

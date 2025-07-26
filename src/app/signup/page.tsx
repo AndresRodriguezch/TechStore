@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Gem } from 'lucide-react';
 
 export default function SignupPage() {
+  const router = useRouter();
+  
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
@@ -39,9 +42,14 @@ export default function SignupPage() {
               <Label htmlFor="password">Contraseña</Label>
               <Input id="password" type="password" required />
             </div>
-            <Button type="submit" className="w-full">
-              Crear una cuenta
-            </Button>
+            <div className="grid gap-2">
+              <Button type="submit" className="w-full">
+                Crear una cuenta
+              </Button>
+               <Button variant="outline" type="button" className="w-full" onClick={() => router.back()}>
+                Volver
+              </Button>
+            </div>
           </div>
           <div className="mt-4 text-center text-sm">
             ¿Ya tienes una cuenta?{' '}
