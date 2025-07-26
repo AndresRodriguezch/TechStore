@@ -26,7 +26,8 @@ export default function ProductsPage() {
               />
             </CardHeader>
             <CardContent className="p-4 flex-grow">
-              <CardTitle className="text-lg font-semibold mb-2">{product.name}</CardTitle>
+              <CardTitle className="text-lg font-semibold mb-1">{product.name}</CardTitle>
+              <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
               <p className="text-sm text-muted-foreground line-clamp-3">{product.description}</p>
             </CardContent>
             <CardFooter className="p-4 pt-0 flex flex-col items-start gap-4 mt-auto">
@@ -34,7 +35,6 @@ export default function ProductsPage() {
                 <p className="text-2xl font-bold">
                   ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
                 </p>
-                 <p className="text-sm text-muted-foreground">{product.category}</p>
               </div>
               <Button className="w-full">Añadir al Carrito</Button>
             </CardFooter>
