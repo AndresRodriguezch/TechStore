@@ -262,7 +262,7 @@ Sidebar.displayName = "Sidebar"
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   Omit<React.ComponentProps<typeof Button>, "asChild">
->(({ className, ...props }, ref) => {
+>(({ className, children, ...props }, ref) => {
   const { toggleSidebar, isMobile } = useSidebar();
 
   if (isMobile) {
@@ -291,8 +291,7 @@ const SidebarTrigger = React.forwardRef<
       onClick={toggleSidebar}
       {...props}
     >
-      <PanelLeft />
-      <span className="group-data-[collapsible=icon]:hidden ml-2">Ocultar barra</span>
+      {children}
     </Button>
   )
 })

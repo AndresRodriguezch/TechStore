@@ -8,7 +8,7 @@ import { SidebarNav } from '@/components/sidebar-nav';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Gem } from 'lucide-react';
+import { Gem, PanelLeft } from 'lucide-react';
 
 export default function AppContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, logout } = useAuth();
@@ -50,9 +50,10 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
           <SidebarNav />
         </SidebarContent>
         <SidebarFooter className="p-2 flex flex-col gap-2">
-          <div className="hidden md:flex justify-start group-data-[collapsible=icon]:justify-center">
+           <div className="hidden md:flex justify-start group-data-[collapsible=icon]:justify-center">
             <SidebarTrigger>
-              <span className="group-data-[collapsible=icon]:hidden">Ocultar barra</span>
+              <PanelLeft />
+              <span className="group-data-[collapsible=icon]:hidden ml-2">Ocultar barra</span>
             </SidebarTrigger>
           </div>
           <DropdownMenu>
