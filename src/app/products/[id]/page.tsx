@@ -73,14 +73,14 @@ export default function ProductDetailPage() {
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
       <Card>
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start">
-          <CardHeader className="p-0">
+        <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-center">
+          <CardHeader className="p-0 flex items-center justify-center">
             <Image
               src={product.imageUrl}
               alt={product.name}
               width={800}
               height={800}
-              className="w-full h-auto object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+              className="w-full h-auto max-h-[500px] object-contain rounded-t-lg md:rounded-l-lg md:rounded-t-none"
               data-ai-hint="product image"
             />
           </CardHeader>
@@ -110,4 +110,3 @@ export default function ProductDetailPage() {
     </div>
   );
 }
-
