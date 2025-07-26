@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useParams, notFound, useRouter } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { db } from '@/lib/firebase';
 import { Product } from '@/lib/types';
@@ -133,9 +134,11 @@ export default function ProductDetailPage() {
       
       {user?.role === 'admin' && (
         <div className="mt-6 flex justify-end gap-4">
-          <Button variant="outline">
-            <Pencil className="mr-2 h-4 w-4" />
-            Editar Producto
+          <Button variant="outline" asChild>
+            <Link href={`/products/${product.id}/edit`}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Editar Producto
+            </Link>
           </Button>
           <Button variant="destructive">
             <Trash2 className="mr-2 h-4 w-4" />
