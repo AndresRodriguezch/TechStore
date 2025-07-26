@@ -30,3 +30,14 @@ export interface Invoice {
   discount: number;
   status: 'Pagada' | 'Pendiente' | 'Vencida';
 }
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  stock: number;
+  rating: number;
+}

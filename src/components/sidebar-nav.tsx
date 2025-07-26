@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { href: "/", label: "Panel", icon: Home, tooltip: "Panel" },
+  { href: "/", label: "Inicio", icon: Home, tooltip: "Inicio" },
   { href: "/invoices", label: "Facturas", icon: FileText, tooltip: "Facturas" },
   { href: "/customers", label: "Clientes", icon: Users, tooltip: "Clientes" },
 ];

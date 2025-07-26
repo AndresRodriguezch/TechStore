@@ -1,4 +1,4 @@
-import { type Customer, type Invoice } from './types';
+import { type Customer, type Invoice, type Product } from './types';
 
 export const customers: Customer[] = [
   {
@@ -99,5 +99,68 @@ export const invoices: Invoice[] = [
     taxRate: 0.02,
     discount: 0,
     status: 'Pagada',
+  },
+];
+
+export const products: Product[] = [
+  {
+    id: 'prod_1',
+    name: 'Laptop Pro 15"',
+    description: 'Potente laptop para profesionales y creativos.',
+    price: 1299.99,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Computadoras',
+    stock: 25,
+    rating: 4.8,
+  },
+  {
+    id: 'prod_2',
+    name: 'Smartphone X',
+    description: 'El último smartphone con cámara de alta resolución.',
+    price: 899.99,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Celulares',
+    stock: 50,
+    rating: 4.7,
+  },
+  {
+    id: 'prod_3',
+    name: 'Auriculares Inalámbricos',
+    description: 'Cancelación de ruido y sonido inmersivo.',
+    price: 199.99,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Accesorios',
+    stock: 120,
+    rating: 4.9,
+  },
+  {
+    id: 'prod_4',
+    name: 'Monitor UltraWide 34"',
+    description: 'Monitor curvo para una experiencia de visualización panorámica.',
+    price: 599.99,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Monitores',
+    stock: 40,
+    rating: 4.6,
+  },
+  {
+    id: 'prod_5',
+    name: 'Teclado Mecánico RGB',
+    description: 'Teclado para gaming con retroiluminación personalizable.',
+    price: 149.99,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Accesorios',
+    stock: 80,
+    rating: 4.8,
+  },
+  {
+    id: 'prod_6',
+    name: 'Smart TV 4K 55"',
+    description: 'Televisor inteligente con resolución 4K y HDR.',
+    price: 699.99,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Televisores',
+    stock: 30,
+    rating: 4.7,
   },
 ];
