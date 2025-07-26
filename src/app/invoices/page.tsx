@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { PlusCircle, MoreHorizontal } from "lucide-react";
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
 
 import {
   Card,
@@ -26,14 +30,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { invoices, customers } from "@/lib/data";
 import InvoiceStatusBadge from "@/components/invoice-status-badge";
-
-function getCustomerById(id: string) {
-  return customers.find((customer) => customer.id === id);
-}
+import { db } from "@/lib/firebase";
+import { Invoice, Customer } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function InvoicesPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [invoicesSnapshot, customersSnapshot] = await Promise.all([
+          getDocs(collection(db, "invoices")),
+          getDocs(collection(db, "customers")),
+        ]);
+        const invoicesData = invoicesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Invoice));
+        const customersData = customersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
+        setInvoices(invoicesData);
+        setCustomers(customersData);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const getCustomerById = (id: string) => {
+    return customers.find((customer) => customer.id === id);
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -67,48 +97,61 @@ export default function InvoicesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((invoice) => {
-              const customer = getCustomerById(invoice.customerId);
-              const subtotal = invoice.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-              const taxAmount = subtotal * invoice.taxRate;
-              const total = subtotal + taxAmount - invoice.discount;
+            {loading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                 <TableRow key={index}>
+                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 rounded-full ml-auto" /></TableCell>
+                  </TableRow>
+              ))
+            ) : (
+              invoices.map((invoice) => {
+                const customer = getCustomerById(invoice.customerId);
+                const subtotal = invoice.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+                const taxAmount = subtotal * invoice.taxRate;
+                const total = subtotal + taxAmount - invoice.discount;
 
-              return (
-                <TableRow key={invoice.id}>
-                  <TableCell className="font-medium">
-                    <Link href={`/invoices/${invoice.id}`} className="hover:underline">
-                      {invoice.invoiceNumber}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{customer?.name}</TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {format(new Date(invoice.dueDate), "PPP", { locale: es })}
-                  </TableCell>
-                  <TableCell>
-                    <InvoiceStatusBadge status={invoice.status} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ${total.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuItem asChild><Link href={`/invoices/${invoice.id}`}>Ver Detalles</Link></DropdownMenuItem>
-                        <DropdownMenuItem>Marcar como Pagada</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive focus:text-destructive">Eliminar</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                return (
+                  <TableRow key={invoice.id}>
+                    <TableCell className="font-medium">
+                      <Link href={`/invoices/${invoice.id}`} className="hover:underline">
+                        {invoice.invoiceNumber}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{customer?.name}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {format(new Date(invoice.dueDate), "PPP", { locale: es })}
+                    </TableCell>
+                    <TableCell>
+                      <InvoiceStatusBadge status={invoice.status} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      ${total.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                          <DropdownMenuItem asChild><Link href={`/invoices/${invoice.id}`}>Ver Detalles</Link></DropdownMenuItem>
+                          <DropdownMenuItem>Marcar como Pagada</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive">Eliminar</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
           </TableBody>
         </Table>
       </CardContent>

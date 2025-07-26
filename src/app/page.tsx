@@ -1,10 +1,35 @@
+"use client";
+
 import Image from "next/image";
-import { products } from "@/lib/data";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { collection, getDocs, limit, query } from "firebase/firestore";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Product } from "@/lib/types";
+import { db } from "@/lib/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const q = query(collection(db, "products"), limit(3));
+        const querySnapshot = await getDocs(q);
+        const productsData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(productsData);
+      } catch (error) {
+        console.error("Error fetching products: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <header className="text-center">
@@ -14,32 +39,50 @@ export default function Home() {
         </p>
       </header>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {products.slice(0, 3).map((product) => (
-          <Card key={product.id} className="flex flex-col overflow-hidden">
-            <CardHeader className="p-0">
-              <Image
-                src={product.imageUrl}
-                alt={product.name}
-                width={600}
-                height={400}
-                className="w-full h-auto object-cover"
-                data-ai-hint="product image"
-              />
-            </CardHeader>
-            <CardContent className="p-4 flex-grow">
-              <CardTitle className="text-lg font-semibold mb-2">{product.name}</CardTitle>
-              <p className="text-sm text-muted-foreground">{product.description}</p>
-            </CardContent>
-            <CardFooter className="p-4 pt-0 flex flex-col items-start gap-4">
-               <div className="flex justify-between items-center w-full">
-                <p className="text-2xl font-bold">
-                  ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-              <Button className="w-full">Añadir al Carrito</Button>
-            </CardFooter>
-          </Card>
-        ))}
+        {loading ? (
+          Array.from({ length: 3 }).map((_, index) => (
+             <Card key={index} className="flex flex-col overflow-hidden">
+              <CardHeader className="p-0">
+                <Skeleton className="w-full h-48" />
+              </CardHeader>
+              <CardContent className="p-4 flex-grow">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-full" />
+                 <Skeleton className="h-4 w-full mt-1" />
+              </CardContent>
+              <CardFooter className="p-4 pt-0">
+                <Skeleton className="h-10 w-full" />
+              </CardFooter>
+            </Card>
+          ))
+        ) : (
+          products.map((product) => (
+            <Card key={product.id} className="flex flex-col overflow-hidden">
+              <CardHeader className="p-0">
+                <Image
+                  src={product.imageUrl}
+                  alt={product.name}
+                  width={600}
+                  height={400}
+                  className="w-full h-auto object-cover"
+                  data-ai-hint="product image"
+                />
+              </CardHeader>
+              <CardContent className="p-4 flex-grow">
+                <CardTitle className="text-lg font-semibold mb-2">{product.name}</CardTitle>
+                <p className="text-sm text-muted-foreground">{product.description}</p>
+              </CardContent>
+              <CardFooter className="p-4 pt-0 flex flex-col items-start gap-4">
+                 <div className="flex justify-between items-center w-full">
+                  <p className="text-2xl font-bold">
+                    ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <Button className="w-full">Añadir al Carrito</Button>
+              </CardFooter>
+            </Card>
+          ))
+        )}
       </div>
        <div className="text-center">
           <Button asChild>

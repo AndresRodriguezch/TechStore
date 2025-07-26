@@ -1,22 +1,95 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { notFound, useParams } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { invoices, customers } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { InvoiceActions } from "@/components/invoice-actions";
 import InvoiceStatusBadge from "@/components/invoice-status-badge";
 import { Gem } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { Invoice, Customer } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
-  const invoice = invoices.find((inv) => inv.id === params.id);
-  if (!invoice) {
-    notFound();
+export default function InvoiceDetailPage() {
+  const params = useParams<{ id: string }>();
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!params.id) return;
+
+    const fetchInvoice = async () => {
+      try {
+        const invoiceRef = doc(db, "invoices", params.id);
+        const invoiceSnap = await getDoc(invoiceRef);
+
+        if (invoiceSnap.exists()) {
+          const invoiceData = { id: invoiceSnap.id, ...invoiceSnap.data() } as Invoice;
+          setInvoice(invoiceData);
+
+          const customerRef = doc(db, "customers", invoiceData.customerId);
+          const customerSnap = await getDoc(customerRef);
+
+          if (customerSnap.exists()) {
+            setCustomer({ id: customerSnap.id, ...customerSnap.data() } as Customer);
+          } else {
+            console.error("No such customer!");
+          }
+        } else {
+          console.error("No such invoice!");
+        }
+      } catch (error) {
+        console.error("Error fetching document: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchInvoice();
+  }, [params.id]);
+
+  if (loading) {
+    return (
+       <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardHeader className="p-6 bg-muted/50">
+             <Skeleton className="h-8 w-1/4" />
+             <Skeleton className="h-4 w-1/5 mt-2" />
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="flex justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-36" />
+              </div>
+              <div className="text-right space-y-2">
+                <Skeleton className="h-4 w-48 ml-auto" />
+                <Skeleton className="h-4 w-48 ml-auto" />
+              </div>
+            </div>
+            <Skeleton className="w-full h-40" />
+            <div className="flex justify-end">
+              <div className="w-full max-w-xs space-y-2">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-8 w-full mt-2" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  const customer = customers.find((c) => c.id === invoice.customerId);
-  if (!customer) {
+  if (!invoice || !customer) {
     notFound();
   }
 

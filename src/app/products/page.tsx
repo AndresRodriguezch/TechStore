@@ -1,9 +1,33 @@
+"use client";
+
 import Image from "next/image";
-import { products } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Product } from "@/lib/types";
+import { db } from "@/lib/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        const productsData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(productsData);
+      } catch (error) {
+        console.error("Error fetching products: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <header className="text-center">
@@ -13,33 +37,52 @@ export default function ProductsPage() {
         </p>
       </header>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {products.map((product) => (
-          <Card key={product.id} className="flex flex-col overflow-hidden">
-            <CardHeader className="p-0">
-              <Image
-                src={product.imageUrl}
-                alt={product.name}
-                width={600}
-                height={400}
-                className="w-full h-auto object-cover"
-                data-ai-hint="product image"
-              />
-            </CardHeader>
-            <CardContent className="p-4 flex-grow">
-              <CardTitle className="text-lg font-semibold mb-1">{product.name}</CardTitle>
-              <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
-              <p className="text-sm text-muted-foreground line-clamp-3">{product.description}</p>
-            </CardContent>
-            <CardFooter className="p-4 pt-0 flex flex-col items-start gap-4 mt-auto">
-               <div className="flex justify-between items-center w-full">
-                <p className="text-2xl font-bold">
-                  ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-              <Button className="w-full">Añadir al Carrito</Button>
-            </CardFooter>
-          </Card>
-        ))}
+        {loading ? (
+          Array.from({ length: 8 }).map((_, index) => (
+            <Card key={index} className="flex flex-col overflow-hidden">
+              <CardHeader className="p-0">
+                <Skeleton className="w-full h-48" />
+              </CardHeader>
+              <CardContent className="p-4 flex-grow">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-full" />
+                 <Skeleton className="h-4 w-full mt-1" />
+              </CardContent>
+              <CardFooter className="p-4 pt-0">
+                <Skeleton className="h-10 w-full" />
+              </CardFooter>
+            </Card>
+          ))
+        ) : (
+          products.map((product) => (
+            <Card key={product.id} className="flex flex-col overflow-hidden">
+              <CardHeader className="p-0">
+                <Image
+                  src={product.imageUrl}
+                  alt={product.name}
+                  width={600}
+                  height={400}
+                  className="w-full h-auto object-cover"
+                  data-ai-hint="product image"
+                />
+              </CardHeader>
+              <CardContent className="p-4 flex-grow">
+                <CardTitle className="text-lg font-semibold mb-1">{product.name}</CardTitle>
+                <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
+                <p className="text-sm text-muted-foreground line-clamp-3">{product.description}</p>
+              </CardContent>
+              <CardFooter className="p-4 pt-0 flex flex-col items-start gap-4 mt-auto">
+                <div className="flex justify-between items-center w-full">
+                  <p className="text-2xl font-bold">
+                    ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <Button className="w-full">Añadir al Carrito</Button>
+              </CardFooter>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );
