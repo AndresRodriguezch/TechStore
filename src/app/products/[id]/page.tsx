@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams, notFound } from 'next/navigation';
+import { useParams, notFound, useRouter } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import Image from 'next/image';
 
@@ -13,9 +13,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ArrowLeft } from 'lucide-react';
 
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -100,10 +102,14 @@ export default function ProductDetailPage() {
             <div className="text-sm text-muted-foreground">
                 <span className="font-semibold text-foreground">Disponibilidad:</span> {product.stock > 0 ? `${product.stock} en stock` : 'Agotado'}
             </div>
-
-            <Button size="lg" className="w-full" disabled={product.stock === 0}>
-              Añadir al Carrito
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button size="lg" className="flex-1" disabled={product.stock === 0}>
+                Añadir al Carrito
+              </Button>
+               <Button size="lg" variant="outline" className="flex-1" onClick={() => router.back()}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+              </Button>
+            </div>
           </CardContent>
         </div>
       </Card>
