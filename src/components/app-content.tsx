@@ -5,9 +5,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarInset, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Gem, PanelLeft, LogOut } from 'lucide-react';
+import { Gem, PanelLeft, LogOut, User } from 'lucide-react';
 
 export default function AppContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, logout } = useAuth();
@@ -48,10 +47,9 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="w-full justify-start gap-3 p-2 h-auto text-left">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="person portrait" />
-                    <AvatarFallback>{user?.email.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
+                  <div className="h-9 w-9 flex items-center justify-center">
+                    <User className="h-5 w-5" />
+                  </div>
                   <div className="flex-grow overflow-hidden group-data-[collapsible=icon]:hidden">
                     <p className="text-sm font-medium truncate">{user?.name || 'Usuario Admin'}</p>
                     <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
