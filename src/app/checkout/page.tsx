@@ -24,6 +24,10 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [loading, setLoading] = useState(false);
 
+  const subtotal = total;
+  const taxAmount = subtotal * 0.19;
+  const finalTotal = subtotal + taxAmount;
+
   if (cart.length === 0) {
     return (
       <Card className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm min-h-[calc(100vh-8rem)]">
@@ -160,7 +164,11 @@ export default function CheckoutPage() {
                  <Separator />
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>{total.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
+                  <span>{subtotal.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>IVA (19%)</span>
+                  <span>{taxAmount.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Envío</span>
@@ -169,12 +177,12 @@ export default function CheckoutPage() {
                 <Separator />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total a Pagar</span>
-                  <span>{total.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
+                  <span>{finalTotal.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
                 </div>
               </CardContent>
               <CardFooter>
                  <Button type="submit" className="w-full" size="lg" disabled={loading || !user}>
-                    {loading ? 'Procesando Pago...' : `Pagar ${total.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}`}
+                    {loading ? 'Procesando Pago...' : `Pagar ${finalTotal.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}`}
                 </Button>
               </CardFooter>
             </Card>
