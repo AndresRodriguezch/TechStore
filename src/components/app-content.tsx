@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
-import { useEffect } from 'react';
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarInset, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
 import { Button } from '@/components/ui/button';
@@ -12,23 +11,11 @@ import { Gem, PanelLeft, LogOut } from 'lucide-react';
 
 export default function AppContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, logout } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
-
-  useEffect(() => {
-    const publicPaths = ['/login', '/signup'];
-    if (!isAuthenticated && !publicPaths.includes(pathname)) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, pathname, router]);
 
   const publicPaths = ['/login', '/signup'];
   if (publicPaths.includes(pathname)) {
     return <>{children}</>;
-  }
-
-  if (!isAuthenticated) {
-    return null; // O un spinner de carga
   }
 
   return (
@@ -56,32 +43,36 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
               <span className="group-data-[collapsible=icon]:hidden ml-2">Ocultar barra</span>
             </SidebarTrigger>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-3 p-2 h-auto text-left">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="person portrait" />
-                  <AvatarFallback>{user?.email.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="flex-grow overflow-hidden group-data-[collapsible=icon]:hidden">
-                  <p className="text-sm font-medium truncate">{user?.name || 'Usuario Admin'}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 mb-2" align="end" side="top">
-              <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Perfil</DropdownMenuItem>
-              <DropdownMenuItem>Configuración</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => logout()}>Cerrar Sesión</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="outline" className="w-full justify-start group-data-[collapsible=icon]:justify-center" onClick={() => logout()}>
-            <LogOut className="mr-2 h-4 w-4 group-data-[collapsible=icon]:mr-0" />
-            <span className="group-data-[collapsible=icon]:hidden">Cerrar Sesión</span>
-          </Button>
+          {isAuthenticated && user && (
+            <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="w-full justify-start gap-3 p-2 h-auto text-left">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="person portrait" />
+                    <AvatarFallback>{user?.email.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-grow overflow-hidden group-data-[collapsible=icon]:hidden">
+                    <p className="text-sm font-medium truncate">{user?.name || 'Usuario Admin'}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 mb-2" align="end" side="top">
+                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Perfil</DropdownMenuItem>
+                <DropdownMenuItem>Configuración</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => logout()}>Cerrar Sesión</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="outline" className="w-full justify-start group-data-[collapsible=icon]:justify-center" onClick={() => logout()}>
+              <LogOut className="mr-2 h-4 w-4 group-data-[collapsible=icon]:mr-0" />
+              <span className="group-data-[collapsible=icon]:hidden">Cerrar Sesión</span>
+            </Button>
+            </>
+          )}
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
