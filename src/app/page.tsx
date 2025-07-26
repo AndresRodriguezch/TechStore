@@ -9,10 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
 import { db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCart } from "@/contexts/cart-context";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -29,6 +33,14 @@ export default function Home() {
     };
     fetchProducts();
   }, []);
+
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    toast({
+      title: "¡Producto añadido!",
+      description: `${product.name} ha sido añadido a tu carrito.`,
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -58,13 +70,13 @@ export default function Home() {
         ) : (
           products.map((product) => (
             <Card key={product.id} className="flex flex-col overflow-hidden">
-              <CardHeader className="p-4 flex justify-center items-center">
+              <CardHeader className="p-4 flex justify-center items-center h-48">
                 <Image
                   src={product.imageUrl}
                   alt={product.name}
                   width={600}
                   height={400}
-                  className="w-full h-40 object-contain"
+                  className="w-full h-full object-contain"
                   data-ai-hint="product image"
                 />
               </CardHeader>
@@ -76,7 +88,7 @@ export default function Home() {
                   </p>
               </CardContent>
               <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-                 <Button className="w-full">Añadir al Carrito</Button>
+                 <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>Añadir al Carrito</Button>
                  <Button variant="outline" className="w-full" asChild>
                   <Link href={`/products/${product.id}`}>Ver Detalles</Link>
                 </Button>

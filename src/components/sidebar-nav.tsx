@@ -4,11 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Users, FileText, LogIn, UserPlus, ShoppingCart, Package } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { useCart } from "@/contexts/cart-context";
 
 import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuBadge,
 } from "@/components/ui/sidebar";
 
 const navItems = [
@@ -27,6 +29,7 @@ const authNavItems = [
 export function SidebarNav() {
   const pathname = usePathname();
   const { isAuthenticated, user } = useAuth();
+  const { cart } = useCart();
 
   const isVisible = (item: typeof navItems[0]) => {
     if (!item.auth) return true; // Public item
@@ -34,6 +37,8 @@ export function SidebarNav() {
     if (item.adminOnly && user?.role !== 'admin') return false; // Admin-only item, but user is not admin
     return true; // Auth item and user is logged in (and has rights if it's admin only)
   }
+  
+  const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <SidebarMenu>
@@ -49,6 +54,9 @@ export function SidebarNav() {
               <Link href={item.href}>
                 <item.icon className="mr-3 h-5 w-5" />
                 <span>{item.label}</span>
+                {item.href === "/cart" && cartItemCount > 0 && (
+                  <SidebarMenuBadge>{cartItemCount}</SidebarMenuBadge>
+                )}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -14,12 +14,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft } from 'lucide-react';
+import { useCart } from '@/contexts/cart-context';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!params.id) return;
@@ -43,6 +47,14 @@ export default function ProductDetailPage() {
 
     fetchProduct();
   }, [params.id]);
+
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    toast({
+      title: "¡Producto añadido!",
+      description: `${product.name} ha sido añadido a tu carrito.`,
+    });
+  };
 
   if (loading) {
     return (
@@ -109,7 +121,7 @@ export default function ProductDetailPage() {
                 <span className="font-semibold text-foreground">Disponibilidad:</span> {product.stock > 0 ? `${product.stock} en stock` : 'Agotado'}
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="flex-1" disabled={product.stock === 0}>
+              <Button size="lg" className="flex-1" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
                 Añadir al Carrito
               </Button>
             </div>
