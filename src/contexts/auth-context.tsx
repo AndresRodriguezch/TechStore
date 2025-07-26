@@ -60,7 +60,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { success: true };
     } catch (error: any) {
       console.error(error);
-      return { success: false, message: 'Credenciales inválidas o el usuario no existe.' };
+       if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        return { success: false, message: 'Credenciales inválidas.' };
+      }
+      return { success: false, message: 'Ocurrió un error al iniciar sesión.' };
     }
   };
 
