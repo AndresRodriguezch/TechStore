@@ -36,6 +36,9 @@ export default function RootLayout({
                 <div className="flex-grow overflow-hidden">
                    <h1 className="text-xl font-semibold truncate">E-commerce</h1>
                 </div>
+                <div className="hidden group-data-[collapsible=icon]:hidden md:block">
+                  <SidebarTrigger />
+                </div>
               </div>
             </SidebarHeader>
             <SidebarContent className="p-2 pt-0">
