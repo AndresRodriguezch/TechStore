@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
@@ -11,6 +12,12 @@ interface User {
   email: string;
   name?: string;
   role?: string;
+  phone?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    country?: string;
+  };
 }
 
 interface AuthContextType {
@@ -39,7 +46,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             uid: firebaseUser.uid,
             email: firebaseUser.email!,
             name: userData.name,
-            role: userData.role
+            role: userData.role,
+            phone: userData.phone,
+            address: userData.address,
           });
         } else {
           // If user exists in Auth but not in Firestore, handle it

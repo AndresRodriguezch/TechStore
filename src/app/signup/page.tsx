@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -19,6 +20,11 @@ export default function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +47,12 @@ export default function SignupPage() {
       await setDoc(doc(db, "users", user.uid), {
         name: name,
         email: email,
+        phone: phone,
+        address: {
+          street: address,
+          city: city,
+          country: country,
+        },
         role: 'user' // Default role
       });
       
@@ -65,7 +77,7 @@ export default function SignupPage() {
   
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-md">
          <CardHeader className="text-center">
             <div className="mb-4 inline-block">
              <Gem className="h-10 w-10 text-primary mx-auto" />
@@ -78,7 +90,7 @@ export default function SignupPage() {
         <CardContent>
           <form onSubmit={handleSignup} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Nombre</Label>
+              <Label htmlFor="name">Nombre Completo</Label>
               <Input 
                 id="name" 
                 placeholder="John Doe" 
@@ -99,6 +111,52 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
               />
+            </div>
+             <div className="grid gap-2">
+              <Label htmlFor="phone">Teléfono</Label>
+              <Input 
+                id="phone" 
+                placeholder="3001234567" 
+                required 
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="address">Dirección</Label>
+              <Input 
+                id="address" 
+                placeholder="Carrera 5 # 10-20" 
+                required 
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+             <div className="grid grid-cols-2 gap-4">
+               <div className="grid gap-2">
+                <Label htmlFor="city">Ciudad</Label>
+                <Input 
+                  id="city" 
+                  placeholder="Bogotá" 
+                  required 
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="country">País</Label>
+                <Input 
+                  id="country" 
+                  placeholder="Colombia" 
+                  required 
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Contraseña</Label>
@@ -132,3 +190,4 @@ export default function SignupPage() {
     </div>
   );
 }
+
