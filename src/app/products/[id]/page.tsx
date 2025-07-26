@@ -13,9 +13,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
@@ -24,6 +25,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!params.id) return;
@@ -128,6 +130,19 @@ export default function ProductDetailPage() {
           </CardContent>
         </div>
       </Card>
+      
+      {user?.role === 'admin' && (
+        <div className="mt-6 flex justify-end gap-4">
+          <Button variant="outline">
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar Producto
+          </Button>
+          <Button variant="destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Eliminar Producto
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
