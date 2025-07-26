@@ -38,15 +38,15 @@ export default function RootLayout({
                        <h1 className="text-xl font-semibold truncate">E-commerce</h1>
                     </div>
                 </div>
-                <div className="hidden md:block">
-                  <SidebarTrigger />
-                </div>
               </div>
             </SidebarHeader>
             <SidebarContent className="p-2 pt-0">
               <SidebarNav />
             </SidebarContent>
-            <SidebarFooter className="p-2">
+            <SidebarFooter className="p-2 flex flex-col gap-2">
+               <div className="hidden md:flex justify-center">
+                  <SidebarTrigger />
+                </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                    <Button variant="ghost" className="w-full justify-start gap-3 p-2 h-auto text-left">
@@ -54,7 +54,7 @@ export default function RootLayout({
                       <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="person portrait" />
                       <AvatarFallback>U</AvatarFallback>
                     </Avatar>
-                    <div className="flex-grow overflow-hidden">
+                    <div className="flex-grow overflow-hidden group-data-[collapsible=icon]:hidden">
                       <p className="text-sm font-medium truncate">Usuario Admin</p>
                       <p className="text-xs text-muted-foreground truncate">admin@example.com</p>
                     </div>
