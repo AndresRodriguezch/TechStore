@@ -14,7 +14,7 @@ import {
 const navItems = [
   { href: "/", label: "Inicio", icon: Home, tooltip: "Inicio", auth: false },
   { href: "/products", label: "Productos", icon: Package, tooltip: "Productos", auth: false },
-  { href: "/cart", label: "Carrito", icon: ShoppingCart, tooltip: "Carrito", auth: false },
+  { href: "/cart", label: "Carrito", icon: ShoppingCart, tooltip: "Carrito", auth: true },
   { href: "/invoices", label: "Facturas", icon: FileText, tooltip: "Facturas", auth: true },
   { href: "/customers", label: "Clientes", icon: Users, tooltip: "Clientes", auth: true, adminOnly: true },
 ];
