@@ -64,21 +64,22 @@ export default function Home() {
                   alt={product.name}
                   width={600}
                   height={400}
-                  className="w-full h-auto object-cover"
+                  className="w-full h-48 object-cover"
                   data-ai-hint="product image"
                 />
               </CardHeader>
               <CardContent className="p-4 flex-grow">
-                <CardTitle className="text-lg font-semibold mb-2">{product.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">{product.description}</p>
-              </CardContent>
-              <CardFooter className="p-4 pt-0 flex flex-col items-start gap-4">
-                 <div className="flex justify-between items-center w-full">
-                  <p className="text-2xl font-bold">
+                <CardTitle className="text-lg font-semibold mb-1 line-clamp-1">{product.name}</CardTitle>
+                <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
+                 <p className="text-2xl font-bold">
                     ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
                   </p>
-                </div>
-                <Button className="w-full">Añadir al Carrito</Button>
+              </CardContent>
+              <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+                 <Button className="w-full">Añadir al Carrito</Button>
+                 <Button variant="outline" className="w-full" asChild>
+                  <Link href={`/products`}>Ver Detalles</Link>
+                </Button>
               </CardFooter>
             </Card>
           ))
