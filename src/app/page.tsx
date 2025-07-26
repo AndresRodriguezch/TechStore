@@ -78,7 +78,7 @@ export default function Home() {
               <CardFooter className="p-4 pt-0 flex flex-col gap-2">
                  <Button className="w-full">Añadir al Carrito</Button>
                  <Button variant="outline" className="w-full" asChild>
-                  <Link href={`/products`}>Ver Detalles</Link>
+                  <Link href={`/products/${product.id}`}>Ver Detalles</Link>
                 </Button>
               </CardFooter>
             </Card>
