@@ -6,7 +6,7 @@ export interface Customer {
   address: {
     street: string;
     city: string;
-    state: string;
+    state:string;
     zip: string;
   };
   company: string;
@@ -28,5 +28,5 @@ export interface Invoice {
   items: InvoiceItem[];
   taxRate: number;
   discount: number;
-  status: 'Paid' | 'Pending' | 'Overdue';
+  status: 'Pagada' | 'Pendiente' | 'Vencida';
 }

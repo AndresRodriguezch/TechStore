@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { invoices, customers } from "@/lib/data";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -29,7 +30,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
         <CardHeader className="p-6 bg-muted/50 print:bg-transparent">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-primary">Invoice</h1>
+              <h1 className="text-3xl font-bold text-primary">Factura</h1>
               <p className="text-muted-foreground">{invoice.invoiceNumber}</p>
               <div className="mt-2">
                 <InvoiceStatusBadge status={invoice.status} />
@@ -46,7 +47,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
           <Separator className="my-4" />
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="font-semibold mb-1">Bill To:</h3>
+              <h3 className="font-semibold mb-1">Facturar a:</h3>
               <p className="font-medium">{customer.name}</p>
               <p className="text-sm text-muted-foreground">{customer.address.street}</p>
               <p className="text-sm text-muted-foreground">{customer.address.city}, {customer.address.state} {customer.address.zip}</p>
@@ -54,10 +55,10 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
             </div>
             <div className="text-right">
               <div className="grid grid-cols-2 gap-y-1">
-                <span className="font-semibold">Issue Date:</span>
-                <span>{format(new Date(invoice.issueDate), 'PPP')}</span>
-                <span className="font-semibold">Due Date:</span>
-                <span>{format(new Date(invoice.dueDate), 'PPP')}</span>
+                <span className="font-semibold">Fecha de Emisión:</span>
+                <span>{format(new Date(invoice.issueDate), 'PPP', { locale: es })}</span>
+                <span className="font-semibold">Fecha de Vencimiento:</span>
+                <span>{format(new Date(invoice.dueDate), 'PPP', { locale: es })}</span>
               </div>
             </div>
           </div>
@@ -66,9 +67,9 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/2">Description</TableHead>
-                <TableHead className="text-center">Quantity</TableHead>
-                <TableHead className="text-right">Unit Price</TableHead>
+                <TableHead className="w-1/2">Descripción</TableHead>
+                <TableHead className="text-center">Cantidad</TableHead>
+                <TableHead className="text-right">Precio Unitario</TableHead>
                 <TableHead className="text-right">Total</TableHead>
               </TableRow>
             </TableHeader>
@@ -91,12 +92,12 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                 <span>${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Tax ({ (invoice.taxRate * 100).toFixed(0) }%)</span>
+                <span className="text-muted-foreground">Impuesto ({ (invoice.taxRate * 100).toFixed(0) }%)</span>
                 <span>${taxAmount.toFixed(2)}</span>
               </div>
               {invoice.discount > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Discount</span>
+                  <span className="text-muted-foreground">Descuento</span>
                   <span>-${invoice.discount.toFixed(2)}</span>
                 </div>
               )}

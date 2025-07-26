@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Users, CreditCard } from "lucide-react";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,7 +15,7 @@ function getCustomerById(id: string) {
 
 export default function Home() {
   const totalRevenue = invoices
-    .filter((invoice) => invoice.status === 'Paid')
+    .filter((invoice) => invoice.status === 'Pagada')
     .reduce((acc, invoice) => {
       const subtotal = invoice.items.reduce((s, item) => s + item.price * item.quantity, 0);
       const taxAmount = subtotal * invoice.taxRate;
@@ -23,7 +24,7 @@ export default function Home() {
     }, 0);
 
   const pendingAmount = invoices
-    .filter((invoice) => invoice.status === 'Pending' || invoice.status === 'Overdue')
+    .filter((invoice) => invoice.status === 'Pendiente' || invoice.status === 'Vencida')
     .reduce((acc, invoice) => {
         const subtotal = invoice.items.reduce((s, item) => s + item.price * item.quantity, 0);
         const taxAmount = subtotal * invoice.taxRate;
@@ -39,32 +40,32 @@ export default function Home() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
             <span className="text-muted-foreground">💵</span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <div className="text-2xl font-bold">${totalRevenue.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <p className="text-xs text-muted-foreground">+20.1% del último mes</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
+            <CardTitle className="text-sm font-medium">Clientes Activos</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+{customers.length}</div>
-            <p className="text-xs text-muted-foreground">All-time customers</p>
+            <p className="text-xs text-muted-foreground">Clientes de todo el tiempo</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Invoices</CardTitle>
+            <CardTitle className="text-sm font-medium">Facturas Pendientes</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${pendingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            <p className="text-xs text-muted-foreground">Across all pending invoices</p>
+            <div className="text-2xl font-bold">${pendingAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <p className="text-xs text-muted-foreground">En todas las facturas pendientes</p>
           </CardContent>
         </Card>
       </div>
@@ -72,12 +73,12 @@ export default function Home() {
       <Card>
         <CardHeader className="flex flex-row items-center">
             <div className="grid gap-2">
-                <CardTitle>Recent Invoices</CardTitle>
-                <CardDescription>An overview of the most recent invoices.</CardDescription>
+                <CardTitle>Facturas Recientes</CardTitle>
+                <CardDescription>Un resumen de las facturas más recientes.</CardDescription>
             </div>
             <Button asChild size="sm" className="ml-auto gap-1">
                 <Link href="/invoices">
-                View All
+                Ver Todas
                 <ArrowUpRight className="h-4 w-4" />
                 </Link>
             </Button>
@@ -86,11 +87,11 @@ export default function Home() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead className="hidden sm:table-cell">Invoice #</TableHead>
-                <TableHead className="hidden sm:table-cell">Status</TableHead>
-                <TableHead className="hidden md:table-cell">Issue Date</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead className="hidden sm:table-cell">Factura #</TableHead>
+                <TableHead className="hidden sm:table-cell">Estado</TableHead>
+                <TableHead className="hidden md:table-cell">Fecha de Emisión</TableHead>
+                <TableHead className="text-right">Monto</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -115,8 +116,8 @@ export default function Home() {
                     <TableCell className="hidden sm:table-cell">
                       <InvoiceStatusBadge status={invoice.status} />
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">{format(new Date(invoice.issueDate), 'PPP')}</TableCell>
-                    <TableCell className="text-right">${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell className="hidden md:table-cell">{format(new Date(invoice.issueDate), 'PPP', { locale: es })}</TableCell>
+                    <TableCell className="text-right">${total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                   </TableRow>
                 );
               })}

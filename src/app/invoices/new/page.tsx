@@ -9,13 +9,13 @@ export default function NewInvoicePage() {
     <Card className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm min-h-[calc(100vh-8rem)]">
       <div className="flex flex-col items-center gap-2 text-center p-8">
         <h3 className="text-2xl font-bold tracking-tight">
-          Invoice Creation
+          Creación de Factura
         </h3>
         <p className="text-muted-foreground max-w-md">
-          The interactive invoice creation form will be available here soon. For now, please enjoy the existing features.
+          El formulario interactivo de creación de facturas estará disponible aquí pronto. Por ahora, disfruta de las funciones existentes.
         </p>
         <Button className="mt-4" asChild>
-          <Link href="/invoices">Back to Invoices</Link>
+          <Link href="/invoices">Volver a Facturas</Link>
         </Button>
       </div>
     </Card>

@@ -20,45 +20,45 @@ export default function CustomersPage() {
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <CardTitle>Customers</CardTitle>
+            <CardTitle>Clientes</CardTitle>
             <CardDescription>
-              Manage your customers and view their details.
+              Gestiona tus clientes y mira sus detalles.
             </CardDescription>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button className="gap-1">
                 <PlusCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Customer</span>
+                <span className="hidden sm:inline">Añadir Cliente</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Add New Customer</DialogTitle>
+                <DialogTitle>Añadir Nuevo Cliente</DialogTitle>
                 <DialogDescription>
-                  Fill in the details below to create a new customer profile.
+                  Rellena los detalles a continuación para crear un nuevo perfil de cliente.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">Name</Label>
+                  <Label htmlFor="name" className="text-right">Nombre</Label>
                   <Input id="name" placeholder="John Doe" className="col-span-3" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">Email</Label>
+                  <Label htmlFor="email" className="text-right">Correo Electrónico</Label>
                   <Input id="email" type="email" placeholder="john@example.com" className="col-span-3" />
                 </div>
                  <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="phone" className="text-right">Phone</Label>
+                  <Label htmlFor="phone" className="text-right">Teléfono</Label>
                   <Input id="phone" placeholder="123-456-7890" className="col-span-3" />
                 </div>
                  <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="company" className="text-right">Company</Label>
+                  <Label htmlFor="company" className="text-right">Empresa</Label>
                   <Input id="company" placeholder="Doe Inc." className="col-span-3" />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" onClick={() => setOpen(false)}>Save Customer</Button>
+                <Button type="submit" onClick={() => setOpen(false)}>Guardar Cliente</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -68,12 +68,12 @@ export default function CustomersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="hidden sm:table-cell">Company</TableHead>
-              <TableHead className="hidden md:table-cell">Email</TableHead>
-              <TableHead>Phone</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead className="hidden sm:table-cell">Empresa</TableHead>
+              <TableHead className="hidden md:table-cell">Correo Electrónico</TableHead>
+              <TableHead>Teléfono</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Acciones</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -93,10 +93,10 @@ export default function CustomersPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View Invoices</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive focus:text-destructive">Delete</DropdownMenuItem>
+                      <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                      <DropdownMenuItem>Editar</DropdownMenuItem>
+                      <DropdownMenuItem>Ver Facturas</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive focus:text-destructive">Eliminar</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

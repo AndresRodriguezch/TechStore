@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: Home },
-  { href: "/invoices", label: "Invoices", icon: FileText },
-  { href: "/customers", label: "Customers", icon: Users },
+  { href: "/", label: "Panel", icon: Home, tooltip: "Panel" },
+  { href: "/invoices", label: "Facturas", icon: FileText, tooltip: "Facturas" },
+  { href: "/customers", label: "Clientes", icon: Users, tooltip: "Clientes" },
 ];
 
 export function SidebarNav() {
@@ -27,6 +27,7 @@ export function SidebarNav() {
             asChild
             isActive={pathname === item.href}
             className="w-full justify-start"
+            tooltip={item.tooltip}
           >
             <Link href={item.href}>
               <item.icon className="mr-3 h-5 w-5" />

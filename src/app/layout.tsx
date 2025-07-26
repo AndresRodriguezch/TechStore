@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarInset, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/toaster';
 import { SidebarNav } from '@/components/sidebar-nav';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Gem } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'E-commerce',
-  description: 'Manage customers and invoices with ease.',
+  description: 'Gestiona clientes y facturas con facilidad.',
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -27,7 +27,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <SidebarProvider>
-          <Sidebar className="print:hidden">
+          <Sidebar collapsible="icon" className="print:hidden">
             <SidebarHeader className="p-4">
               <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" className="text-primary rounded-lg flex-shrink-0">
@@ -50,21 +50,22 @@ export default function RootLayout({
                       <AvatarFallback>U</AvatarFallback>
                     </Avatar>
                     <div className="flex-grow overflow-hidden">
-                      <p className="text-sm font-medium truncate">Admin User</p>
+                      <p className="text-sm font-medium truncate">Usuario Admin</p>
                       <p className="text-xs text-muted-foreground truncate">admin@example.com</p>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 mb-2" align="end" side="top">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem>Perfil</DropdownMenuItem>
+                  <DropdownMenuItem>Configuración</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Log out</DropdownMenuItem>
+                  <DropdownMenuItem>Cerrar Sesión</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </SidebarFooter>
+            <SidebarRail />
           </Sidebar>
           <SidebarInset>
             <header className="flex h-14 items-center gap-4 border-b bg-card px-6 sticky top-0 z-10 md:hidden print:hidden">

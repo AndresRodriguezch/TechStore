@@ -48,7 +48,7 @@ export const invoices: Invoice[] = [
     ],
     taxRate: 0.08,
     discount: 100,
-    status: 'Paid',
+    status: 'Pagada',
   },
   {
     id: 'inv_2',
@@ -59,7 +59,7 @@ export const invoices: Invoice[] = [
     items: [{ id: 'item_3', description: 'Marketing Consultation', quantity: 5, price: 200 }],
     taxRate: 0.0,
     discount: 0,
-    status: 'Pending',
+    status: 'Pendiente',
   },
   {
     id: 'inv_3',
@@ -73,7 +73,7 @@ export const invoices: Invoice[] = [
     ],
     taxRate: 0.05,
     discount: 50,
-    status: 'Overdue',
+    status: 'Vencida',
   },
   {
     id: 'inv_4',
@@ -84,7 +84,7 @@ export const invoices: Invoice[] = [
     items: [{ id: 'item_6', description: 'Monthly Retainer - SEO Services', quantity: 1, price: 2500 }],
     taxRate: 0.08,
     discount: 0,
-    status: 'Pending',
+    status: 'Pendiente',
   },
   {
     id: 'inv_5',
@@ -98,6 +98,6 @@ export const invoices: Invoice[] = [
     ],
     taxRate: 0.02,
     discount: 0,
-    status: 'Paid',
+    status: 'Pagada',
   },
 ];

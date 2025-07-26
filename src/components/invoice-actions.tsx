@@ -12,11 +12,11 @@ export function InvoiceActions() {
     <>
       <Button variant="outline" onClick={handlePrint}>
         <Printer className="mr-2 h-4 w-4" />
-        Print
+        Imprimir
       </Button>
       <Button onClick={handlePrint}>
         <Download className="mr-2 h-4 w-4" />
-        Export PDF
+        Exportar PDF
       </Button>
     </>
   );
