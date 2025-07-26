@@ -94,8 +94,8 @@ export default function ProductsPage() {
         {loading ? (
           Array.from({ length: 8 }).map((_, index) => (
             <Card key={index} className="flex flex-col overflow-hidden">
-              <CardHeader className="p-0">
-                <Skeleton className="w-full h-48" />
+              <CardHeader className="p-4 flex justify-center items-center">
+                <Skeleton className="w-full h-40" />
               </CardHeader>
               <CardContent className="p-4 flex-grow">
                 <Skeleton className="h-6 w-3/4 mb-2" />
@@ -111,13 +111,13 @@ export default function ProductsPage() {
         ) : (
           filteredProducts.map((product) => (
             <Card key={product.id} className="flex flex-col overflow-hidden">
-              <CardHeader className="p-0">
+              <CardHeader className="p-4 flex justify-center items-center">
                 <Image
                   src={product.imageUrl}
                   alt={product.name}
                   width={600}
                   height={400}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-40 object-contain"
                   data-ai-hint="product image"
                 />
               </CardHeader>
