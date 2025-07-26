@@ -147,7 +147,7 @@ export default function EditProductPage() {
         title: "¡Producto Actualizado!",
         description: "El producto ha sido actualizado correctamente.",
       });
-      router.push(`/products/${params.id}`);
+      router.replace(`/products/${params.id}`);
     } catch (error) {
       console.error("Error updating product:", error);
       toast({
