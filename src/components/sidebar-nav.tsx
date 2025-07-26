@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, FileText, LogIn, UserPlus, ShoppingCart, Package } from "lucide-react";
+import { Home, Users, FileText, LogIn, UserPlus, ShoppingCart, Package, CreditCard } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useCart } from "@/contexts/cart-context";
 
@@ -17,6 +17,7 @@ const navItems = [
   { href: "/", label: "Inicio", icon: Home, tooltip: "Inicio", auth: false },
   { href: "/products", label: "Productos", icon: Package, tooltip: "Productos", auth: false },
   { href: "/cart", label: "Carrito", icon: ShoppingCart, tooltip: "Carrito", auth: true },
+  { href: "/checkout", label: "Checkout", icon: CreditCard, tooltip: "Checkout", auth: true },
   { href: "/invoices", label: "Facturas", icon: FileText, tooltip: "Facturas", auth: true },
   { href: "/customers", label: "Clientes", icon: Users, tooltip: "Clientes", auth: true, adminOnly: true },
 ];
@@ -32,6 +33,7 @@ export function SidebarNav() {
   const { cart } = useCart();
 
   const isVisible = (item: typeof navItems[0]) => {
+    if (item.href === '/checkout') return false; // Always hide checkout from nav
     if (!item.auth) return true; // Public item
     if (!isAuthenticated) return false; // Auth-only item, but user is not logged in
     if (item.adminOnly && user?.role !== 'admin') return false; // Admin-only item, but user is not admin

@@ -104,7 +104,9 @@ export default function CartPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full">Proceder al Pago</Button>
+            <Button className="w-full" asChild>
+              <Link href="/checkout">Proceder al Pago</Link>
+            </Button>
           </CardFooter>
         </Card>
       </div>
