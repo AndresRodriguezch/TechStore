@@ -1,0 +1,103 @@
+import { type Customer, type Invoice } from './types';
+
+export const customers: Customer[] = [
+  {
+    id: 'cus_1',
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    phone: '123-456-7890',
+    address: { street: '123 Main St', city: 'Anytown', state: 'CA', zip: '12345' },
+    company: 'Doe Inc.',
+  },
+  {
+    id: 'cus_2',
+    name: 'Jane Smith',
+    email: 'jane.smith@example.com',
+    phone: '987-654-3210',
+    address: { street: '456 Oak Ave', city: 'Someville', state: 'NY', zip: '67890' },
+    company: 'Smith & Co.',
+  },
+  {
+    id: 'cus_3',
+    name: 'Innovate LLC',
+    email: 'contact@innovatellc.com',
+    phone: '555-123-4567',
+    address: { street: '789 Tech Park', city: 'Silicon Valley', state: 'CA', zip: '54321' },
+    company: 'Innovate LLC',
+  },
+  {
+    id: 'cus_4',
+    name: 'Global Exports',
+    email: 'support@globalexports.com',
+    phone: '555-987-6543',
+    address: { street: '101 Trade Center', city: 'Metropolis', state: 'IL', zip: '10101' },
+    company: 'Global Exports',
+  },
+];
+
+export const invoices: Invoice[] = [
+  {
+    id: 'inv_1',
+    invoiceNumber: 'INV-001',
+    customerId: 'cus_1',
+    issueDate: '2024-06-15',
+    dueDate: '2024-07-15',
+    items: [
+      { id: 'item_1', description: 'Web Development Services', quantity: 10, price: 150 },
+      { id: 'item_2', description: 'Logo Design', quantity: 1, price: 500 },
+    ],
+    taxRate: 0.08,
+    discount: 100,
+    status: 'Paid',
+  },
+  {
+    id: 'inv_2',
+    invoiceNumber: 'INV-002',
+    customerId: 'cus_2',
+    issueDate: '2024-07-01',
+    dueDate: '2024-07-31',
+    items: [{ id: 'item_3', description: 'Marketing Consultation', quantity: 5, price: 200 }],
+    taxRate: 0.0,
+    discount: 0,
+    status: 'Pending',
+  },
+  {
+    id: 'inv_3',
+    invoiceNumber: 'INV-003',
+    customerId: 'cus_3',
+    issueDate: '2024-05-20',
+    dueDate: '2024-06-20',
+    items: [
+      { id: 'item_4', description: 'Cloud Server Hosting (Annual)', quantity: 1, price: 1200 },
+      { id: 'item_5', description: 'Domain Name Registration', quantity: 2, price: 15 },
+    ],
+    taxRate: 0.05,
+    discount: 50,
+    status: 'Overdue',
+  },
+  {
+    id: 'inv_4',
+    invoiceNumber: 'INV-004',
+    customerId: 'cus_1',
+    issueDate: '2024-07-10',
+    dueDate: '2024-08-10',
+    items: [{ id: 'item_6', description: 'Monthly Retainer - SEO Services', quantity: 1, price: 2500 }],
+    taxRate: 0.08,
+    discount: 0,
+    status: 'Pending',
+  },
+  {
+    id: 'inv_5',
+    invoiceNumber: 'INV-005',
+    customerId: 'cus_4',
+    issueDate: '2024-07-05',
+    dueDate: '2024-08-05',
+    items: [
+      { id: 'item_7', description: 'Shipping Container Rental', quantity: 3, price: 300 },
+      { id: 'item_8', description: 'Insurance Coverage', quantity: 1, price: 150 },
+    ],
+    taxRate: 0.02,
+    discount: 0,
+    status: 'Paid',
+  },
+];

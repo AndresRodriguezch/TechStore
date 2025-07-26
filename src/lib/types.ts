@@ -1,0 +1,32 @@
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  company: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  customerId: string;
+  issueDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  taxRate: number;
+  discount: number;
+  status: 'Paid' | 'Pending' | 'Overdue';
+}
