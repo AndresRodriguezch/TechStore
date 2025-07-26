@@ -87,5 +87,30 @@
 @media print {
   body {
     background: white !important;
+    color: black !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+
+  .print-hidden, .print\:hidden {
+    display: none !important;
+  }
+  
+  main {
+    padding: 0 !important;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\:border-none {
+     border: none !important;
+  }
+
+  .print\:bg-transparent {
+      background-color: transparent !important;
   }
 }
