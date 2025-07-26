@@ -129,7 +129,7 @@ export default function ProductsPage() {
                   alt={product.name}
                   width={600}
                   height={400}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain p-2"
                   data-ai-hint="product image"
                 />
               </CardHeader>
@@ -137,7 +137,7 @@ export default function ProductsPage() {
                 <CardTitle className="text-lg font-semibold mb-1 line-clamp-1">{product.name}</CardTitle>
                 <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
                  <p className="text-2xl font-bold">
-                    ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
+                    {product.price.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}
                   </p>
               </CardContent>
               <CardFooter className="p-4 pt-0 flex flex-col gap-2">

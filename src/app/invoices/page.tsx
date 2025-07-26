@@ -130,7 +130,7 @@ export default function InvoicesPage() {
                       <InvoiceStatusBadge status={invoice.status} />
                     </TableCell>
                     <TableCell className="text-right">
-                      ${total.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
+                      {total.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>

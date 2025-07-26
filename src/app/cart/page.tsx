@@ -53,7 +53,7 @@ export default function CartPage() {
                       {item.name}
                     </Link>
                     <p className="text-sm text-muted-foreground">
-                      ${item.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
+                      {item.price.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
@@ -70,7 +70,7 @@ export default function CartPage() {
                     </Button>
                   </div>
                   <div className="text-right font-semibold w-24">
-                     ${(item.price * item.quantity).toLocaleString("es-ES", { minimumFractionDigits: 2 })}
+                     {(item.price * item.quantity).toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}
                   </div>
                 </div>
               ))}
@@ -91,7 +91,7 @@ export default function CartPage() {
           <CardContent className="grid gap-4">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${total.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
+              <span>{total.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
             </div>
             <div className="flex justify-between">
               <span>Envío</span>
@@ -100,7 +100,7 @@ export default function CartPage() {
             <Separator />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>${total.toLocaleString("es-ES", { minimumFractionDigits: 2 })}</span>
+              <span>{total.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
             </div>
           </CardContent>
           <CardFooter>

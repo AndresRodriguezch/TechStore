@@ -151,8 +151,8 @@ export default function InvoiceDetailPage() {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.description}</TableCell>
                   <TableCell className="text-center">{item.quantity}</TableCell>
-                  <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">${(item.quantity * item.price).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{item.price.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</TableCell>
+                  <TableCell className="text-right">{(item.quantity * item.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -162,22 +162,22 @@ export default function InvoiceDetailPage() {
             <div className="w-full max-w-xs space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{subtotal.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Impuesto ({ (invoice.taxRate * 100).toFixed(0) }%)</span>
-                <span>${taxAmount.toFixed(2)}</span>
+                <span>{taxAmount.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
               </div>
               {invoice.discount > 0 && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Descuento</span>
-                  <span>-${invoice.discount.toFixed(2)}</span>
+                  <span>-{invoice.discount.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>{total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
               </div>
             </div>
           </div>

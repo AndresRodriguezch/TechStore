@@ -113,7 +113,7 @@ export default function ProductDetailPage() {
               <CardTitle className="text-3xl lg:text-4xl font-bold">{product.name}</CardTitle>
             </div>
             <p className="text-3xl font-semibold">
-                ${product.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                {product.price.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}
             </p>
             <Separator />
             <CardDescription className="text-base text-muted-foreground">
