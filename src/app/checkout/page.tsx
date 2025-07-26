@@ -6,12 +6,12 @@ import Link from "next/link";
 import { useCart } from "@/contexts/cart-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { CreditCard, Banknote, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import CreditCardForm from "@/components/credit-card-form";
+import { Label } from "@/components/ui/label";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -85,25 +85,8 @@ export default function CheckoutPage() {
                 </RadioGroup>
 
                 {paymentMethod === 'card' && (
-                  <div className="mt-6 grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="card-number">Número de Tarjeta</Label>
-                      <Input id="card-number" placeholder="0000 0000 0000 0000" required disabled={loading} />
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="grid gap-2 col-span-2">
-                        <Label htmlFor="expiry-date">Fecha de Expiración</Label>
-                        <Input id="expiry-date" placeholder="MM/AA" required disabled={loading}/>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="cvc">CVC</Label>
-                        <Input id="cvc" placeholder="123" required disabled={loading}/>
-                      </div>
-                    </div>
-                     <div className="grid gap-2">
-                      <Label htmlFor="card-holder">Nombre del Titular</Label>
-                      <Input id="card-holder" placeholder="John Doe" required disabled={loading}/>
-                    </div>
+                  <div className="mt-6">
+                    <CreditCardForm disabled={loading} />
                   </div>
                 )}
                  {paymentMethod === 'pse' && (
