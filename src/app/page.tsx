@@ -2,26 +2,6 @@ import Image from "next/image";
 import { products } from "@/lib/data";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, StarHalf } from "lucide-react";
-
-function ProductRating({ rating }: { rating: number }) {
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 !== 0;
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-  return (
-    <div className="flex items-center gap-1">
-      {[...Array(fullStars)].map((_, i) => (
-        <Star key={`full-${i}`} className="h-5 w-5 fill-amber-400 text-amber-400" />
-      ))}
-      {halfStar && <StarHalf className="h-5 w-5 fill-amber-400 text-amber-400" />}
-      {[...Array(emptyStars)].map((_, i) => (
-        <Star key={`empty-${i}`} className="h-5 w-5 text-gray-300" />
-      ))}
-      <span className="text-sm text-muted-foreground ml-2">({rating})</span>
-    </div>
-  );
-}
 
 export default function Home() {
   return (
@@ -54,7 +34,6 @@ export default function Home() {
                 <p className="text-2xl font-bold">
                   ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
                 </p>
-                <ProductRating rating={product.rating} />
               </div>
               <Button className="w-full">Añadir al Carrito</Button>
             </CardFooter>
