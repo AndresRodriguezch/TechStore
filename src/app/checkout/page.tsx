@@ -12,9 +12,13 @@ import { CreditCard, Banknote, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CreditCardForm from "@/components/credit-card-form";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/auth-context";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const { cart, total, clearCart } = useCart();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState("card");
@@ -45,14 +49,54 @@ export default function CheckoutPage() {
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    toast({
-      title: "¡Pago Exitoso!",
-      description: "Tu pedido ha sido procesado correctamente.",
-    });
+    if (user) {
+        try {
+            const issueDate = new Date();
+            const dueDate = new Date();
+            dueDate.setDate(issueDate.getDate() + 30);
 
-    clearCart();
-    router.push("/");
-    setLoading(false);
+            await addDoc(collection(db, "invoices"), {
+                invoiceNumber: `INV-${Date.now()}`,
+                customerId: user.uid,
+                issueDate: issueDate.toISOString().split('T')[0], // YYYY-MM-DD
+                dueDate: dueDate.toISOString().split('T')[0], // YYYY-MM-DD
+                items: cart.map(item => ({
+                    id: item.id,
+                    description: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                })),
+                taxRate: 0.19, // Example tax rate
+                discount: 0,
+                status: 'Pagada',
+            });
+            
+            toast({
+              title: "¡Pago Exitoso!",
+              description: "Tu pedido ha sido procesado y se ha generado la factura.",
+            });
+
+            clearCart();
+            router.push("/");
+
+        } catch (error) {
+             console.error("Error creating invoice: ", error);
+             toast({
+                title: "Error",
+                description: "Ocurrió un error al generar tu factura.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    } else {
+        toast({
+            title: "Error de Autenticación",
+            description: "Debes iniciar sesión para completar la compra.",
+            variant: "destructive",
+        });
+        setLoading(false);
+    }
   }
 
   return (
@@ -129,7 +173,7 @@ export default function CheckoutPage() {
                 </div>
               </CardContent>
               <CardFooter>
-                 <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                 <Button type="submit" className="w-full" size="lg" disabled={loading || !user}>
                     {loading ? 'Procesando Pago...' : `Pagar ${total.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}`}
                 </Button>
               </CardFooter>
