@@ -39,5 +39,4 @@ export interface Product {
   imageUrl: string;
   category: string;
   stock: number;
-  rating: number;
 }

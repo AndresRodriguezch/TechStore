@@ -34,6 +34,7 @@ export default function ProductsPage() {
                 <p className="text-2xl font-bold">
                   ${product.price.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
                 </p>
+                 <p className="text-sm text-muted-foreground">{product.category}</p>
               </div>
               <Button className="w-full">Añadir al Carrito</Button>
             </CardFooter>

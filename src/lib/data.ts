@@ -111,7 +111,6 @@ export const products: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Computadoras',
     stock: 25,
-    rating: 4.8,
   },
   {
     id: 'prod_2',
@@ -121,7 +120,6 @@ export const products: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Celulares',
     stock: 50,
-    rating: 4.7,
   },
   {
     id: 'prod_3',
@@ -131,7 +129,6 @@ export const products: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Accesorios',
     stock: 120,
-    rating: 4.9,
   },
   {
     id: 'prod_4',
@@ -141,7 +138,6 @@ export const products: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Monitores',
     stock: 40,
-    rating: 4.6,
   },
   {
     id: 'prod_5',
@@ -151,7 +147,6 @@ export const products: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Accesorios',
     stock: 80,
-    rating: 4.8,
   },
   {
     id: 'prod_6',
@@ -161,6 +156,14 @@ export const products: Product[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Televisores',
     stock: 30,
-    rating: 4.7,
+  },
+  {
+    id: 'prod_7',
+    name: 'Tablet 10"',
+    description: 'Tablet ligera y potente para el día a día.',
+    price: 329.99,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Tablets',
+    stock: 60,
   },
 ];
