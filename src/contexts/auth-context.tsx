@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signInWithEmailAndPassword(auth, email, pass);
       return { success: true };
     } catch (error: any) {
-      console.error(error);
+       console.error("Firebase Auth Error:", error.code, error.message);
        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         return { success: false, message: 'Credenciales inválidas.' };
       }
