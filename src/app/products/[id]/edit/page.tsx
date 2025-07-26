@@ -215,9 +215,9 @@ export default function EditProductPage() {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Precio</FormLabel>
+                    <FormLabel>Precio (COP)</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" placeholder="Ej: 1299.99" {...field} disabled={loading} />
+                      <Input type="number" placeholder="Ej: 1299900" {...field} disabled={loading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
