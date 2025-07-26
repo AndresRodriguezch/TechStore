@@ -14,17 +14,21 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = login(email, password);
+    setError('');
+    setLoading(true);
+    const result = await login(email, password);
     if (result.success) {
       router.push('/');
     } else {
       setError(result.message || 'Credenciales inválidas.');
     }
+    setLoading(false);
   };
 
   return (
@@ -50,6 +54,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div className="grid gap-2">
@@ -65,14 +70,15 @@ export default function LoginPage() {
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
               />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <div className="grid gap-2">
-              <Button type="submit" className="w-full">
-                Iniciar Sesión
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Iniciando...' : 'Iniciar Sesión'}
               </Button>
-              <Button variant="outline" type="button" className="w-full" onClick={() => router.back()}>
+              <Button variant="outline" type="button" className="w-full" onClick={() => router.back()} disabled={loading}>
                 Volver
               </Button>
             </div>

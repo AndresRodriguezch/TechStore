@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarInset, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
@@ -15,6 +15,10 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
   const publicPaths = ['/login', '/signup'];
   if (publicPaths.includes(pathname)) {
     return <>{children}</>;
+  }
+
+  const handleLogout = async () => {
+    await logout();
   }
 
   return (
@@ -51,7 +55,7 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
                     <User className="h-5 w-5" />
                   </div>
                   <div className="flex-grow overflow-hidden group-data-[collapsible=icon]:hidden">
-                    <p className="text-sm font-medium truncate">{user?.name || 'Usuario Admin'}</p>
+                    <p className="text-sm font-medium truncate">{user?.name || 'Usuario'}</p>
                     <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                   </div>
                 </Button>
@@ -62,10 +66,10 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
                 <DropdownMenuItem>Perfil</DropdownMenuItem>
                 <DropdownMenuItem>Configuración</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => logout()}>Cerrar Sesión</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>Cerrar Sesión</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" className="w-full justify-start group-data-[collapsible=icon]:justify-center" onClick={() => logout()}>
+            <Button variant="outline" className="w-full justify-start group-data-[collapsible=icon]:justify-center" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4 group-data-[collapsible=icon]:mr-0" />
               <span className="group-data-[collapsible=icon]:hidden">Cerrar Sesión</span>
             </Button>

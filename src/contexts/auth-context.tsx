@@ -2,54 +2,82 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 
 interface User {
-  id: string;
-  name?: string;
+  uid: string;
   email: string;
+  name?: string;
+  role?: string;
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  login: (email: string, pass: string) => { success: boolean; message?: string };
-  logout: () => void;
+  loading: boolean;
+  login: (email: string, pass: string) => Promise<{ success: boolean; message?: string }>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email!,
+            name: userData.name,
+            role: userData.role
+          });
+        } else {
+          // If user exists in Auth but not in Firestore, handle it
+          setUser({ uid: firebaseUser.uid, email: firebaseUser.email! });
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = (email: string, pass: string) => {
-    if (email === 'admin@gmail.com' && pass === '12345678') {
-      const adminUser: User = { id: 'admin', email: 'admin@gmail.com', name: 'Admin' };
-      localStorage.setItem('user', JSON.stringify(adminUser));
-      setUser(adminUser);
+  const login = async (email: string, pass: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
       return { success: true };
+    } catch (error: any) {
+      console.error(error);
+      return { success: false, message: 'Credenciales inválidas o el usuario no existe.' };
     }
-    return { success: false, message: 'Credenciales de administrador incorrectas.' };
   };
 
-  const logout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-    router.push('/');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
   };
 
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
