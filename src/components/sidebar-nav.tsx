@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, FileText, LogIn, UserPlus } from "lucide-react";
+import { Home, Users, FileText, LogIn, UserPlus, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 
 import {
@@ -13,6 +13,7 @@ import {
 
 const navItems = [
   { href: "/", label: "Inicio", icon: Home, tooltip: "Inicio", auth: false },
+  { href: "/cart", label: "Carrito", icon: ShoppingCart, tooltip: "Carrito", auth: false },
   { href: "/invoices", label: "Facturas", icon: FileText, tooltip: "Facturas", auth: true },
   { href: "/customers", label: "Clientes", icon: Users, tooltip: "Clientes", auth: true },
 ];
