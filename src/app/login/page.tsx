@@ -28,60 +28,58 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-      <div className="flex w-full max-w-sm flex-col items-center">
-        <Card className="w-full">
-          <CardHeader className="text-center">
-            <div className="mb-4 inline-block">
-               <Gem className="h-10 w-10 text-primary mx-auto" />
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <div className="mb-4 inline-block">
+             <Gem className="h-10 w-10 text-primary mx-auto" />
+          </div>
+          <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
+          <CardDescription>
+            Ingresa tu correo electrónico a continuación para acceder a tu cuenta.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Correo Electrónico</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="nombre@ejemplo.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
-            <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
-            <CardDescription>
-              Ingresa tu correo electrónico a continuación para acceder a tu cuenta.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Correo Electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="nombre@ejemplo.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Contraseña</Label>
+                <Link href="#" className="ml-auto inline-block text-sm underline">
+                  ¿Olvidaste tu contraseña?
+                </Link>
               </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <Link href="#" className="ml-auto inline-block text-sm underline">
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </div>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  required 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full">
-                Iniciar Sesión
-              </Button>
-            </form>
-            <div className="mt-4 text-center text-sm">
-              ¿No tienes una cuenta?{' '}
-              <Link href="/signup" className="underline">
-                Regístrate
-              </Link>
+              <Input 
+                id="password" 
+                type="password" 
+                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="w-full">
+              Iniciar Sesión
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            ¿No tienes una cuenta?{' '}
+            <Link href="/signup" className="underline">
+              Regístrate
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
