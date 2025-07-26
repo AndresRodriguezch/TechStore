@@ -29,14 +29,16 @@ export default function RootLayout({
         <SidebarProvider>
           <Sidebar collapsible="icon" className="print:hidden">
             <SidebarHeader className="p-4">
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" className="text-primary rounded-lg flex-shrink-0">
-                  <Gem className="h-7 w-7" />
-                </Button>
-                <div className="flex-grow overflow-hidden">
-                   <h1 className="text-xl font-semibold truncate">E-commerce</h1>
+              <div className="flex items-center justify-between gap-3">
+                 <div className="flex items-center gap-3 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center">
+                    <Button variant="ghost" size="icon" className="text-primary rounded-lg flex-shrink-0">
+                      <Gem className="h-7 w-7" />
+                    </Button>
+                    <div className="flex-grow overflow-hidden group-data-[collapsible=icon]:hidden">
+                       <h1 className="text-xl font-semibold truncate">E-commerce</h1>
+                    </div>
                 </div>
-                <div className="hidden group-data-[collapsible=icon]:hidden md:block">
+                <div className="hidden md:block">
                   <SidebarTrigger />
                 </div>
               </div>
