@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,12 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Product } from "@/lib/types";
 import { db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/auth-context";
+import { PlusCircle } from "lucide-react";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -47,11 +51,21 @@ export default function ProductsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">Todos los Productos</h1>
-        <p className="text-muted-foreground mt-2">
-          Explora nuestro catálogo completo de productos tecnológicos.
-        </p>
+      <header className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="text-center sm:text-left">
+            <h1 className="text-4xl font-bold tracking-tight">Todos los Productos</h1>
+            <p className="text-muted-foreground mt-2">
+            Explora nuestro catálogo completo de productos tecnológicos.
+            </p>
+        </div>
+        {user?.role === 'admin' && (
+             <Button asChild className="gap-1 w-full sm:w-auto">
+                <Link href="/products/new">
+                <PlusCircle className="h-4 w-4" />
+                <span>Crear Producto</span>
+                </Link>
+            </Button>
+        )}
       </header>
 
       <div className="flex flex-col sm:flex-row gap-4">
