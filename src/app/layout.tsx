@@ -6,7 +6,7 @@ import { SidebarNav } from '@/components/sidebar-nav';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Gem } from 'lucide-react';
+import { Gem, PanelLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'E-commerce',
@@ -44,8 +44,13 @@ export default function RootLayout({
               <SidebarNav />
             </SidebarContent>
             <SidebarFooter className="p-2 flex flex-col gap-2">
-               <div className="hidden md:flex justify-center">
-                  <SidebarTrigger />
+               <div className="hidden md:flex justify-start group-data-[collapsible=icon]:justify-center">
+                  <SidebarTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-start group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
+                      <PanelLeft />
+                      <span className="group-data-[collapsible=icon]:hidden ml-2">Ocultar barra</span>
+                    </Button>
+                  </SidebarTrigger>
                 </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
