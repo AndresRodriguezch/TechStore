@@ -8,7 +8,7 @@ import { SidebarNav } from '@/components/sidebar-nav';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Gem, PanelLeft } from 'lucide-react';
+import { Gem, PanelLeft, LogOut } from 'lucide-react';
 
 export default function AppContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, logout } = useAuth();
@@ -78,6 +78,10 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
               <DropdownMenuItem onClick={() => logout()}>Cerrar Sesión</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button variant="outline" className="w-full justify-start group-data-[collapsible=icon]:justify-center" onClick={() => logout()}>
+            <LogOut className="mr-2 h-4 w-4 group-data-[collapsible=icon]:mr-0" />
+            <span className="group-data-[collapsible=icon]:hidden">Cerrar Sesión</span>
+          </Button>
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
