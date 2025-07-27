@@ -1,3 +1,4 @@
+
 export interface Customer {
   id: string;
   name: string;
@@ -6,10 +7,8 @@ export interface Customer {
   address?: {
     street: string;
     city: string;
-    state:string;
-    zip: string;
+    country: string;
   };
-  company?: string;
   role?: 'admin' | 'user';
 }
 
@@ -30,6 +29,7 @@ export interface Invoice {
   taxRate: number;
   discount: number;
   status: 'Pagada' | 'Pendiente' | 'Vencida';
+  paymentMethod: 'card' | 'pse';
 }
 
 export interface Product {

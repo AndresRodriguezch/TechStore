@@ -1,3 +1,4 @@
+
 "use client";
 
 import { notFound, useParams } from "next/navigation";
@@ -11,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Separator } from "@/components/ui/separator";
 import { InvoiceActions } from "@/components/invoice-actions";
 import InvoiceStatusBadge from "@/components/invoice-status-badge";
-import { Gem } from "lucide-react";
+import { Gem, CreditCard, Banknote } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { Invoice, Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -138,6 +139,15 @@ export default function InvoiceDetailPage() {
                   <span className="font-semibold">Fecha de Vencimiento:</span>
                   <span>{format(new Date(invoice.dueDate), 'PPP', { locale: es })}</span>
                 </div>
+                {invoice.paymentMethod && (
+                    <div className="flex items-center justify-end gap-2 mt-2">
+                        <span className="font-semibold">Método de Pago:</span>
+                        <span className="flex items-center gap-1 text-muted-foreground">
+                            {invoice.paymentMethod === 'card' ? <CreditCard className="h-4 w-4" /> : <Banknote className="h-4 w-4" />}
+                            {invoice.paymentMethod === 'card' ? 'Tarjeta' : 'PSE'}
+                        </span>
+                    </div>
+                )}
               </div>
             </div>
           </CardHeader>

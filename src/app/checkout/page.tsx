@@ -16,13 +16,14 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/auth-context";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Invoice } from "@/lib/types";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { cart, total, clearCart } = useCart();
   const { toast } = useToast();
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "pse">("card");
   const [loading, setLoading] = useState(false);
   const [isCardFormValid, setIsCardFormValid] = useState(false);
 
@@ -71,6 +72,12 @@ export default function CheckoutPage() {
             const issueDate = new Date();
             const dueDate = new Date();
             dueDate.setDate(issueDate.getDate() + 30);
+            
+            const invoiceStatus: Invoice['status'] = paymentMethod === 'card' ? 'Pagada' : 'Pendiente';
+            const successTitle = paymentMethod === 'card' ? "¡Pago Exitoso!" : "¡Pedido Recibido!";
+            const successDescription = paymentMethod === 'card' 
+                ? "Tu pedido ha sido procesado y se ha generado la factura."
+                : "Tu pedido está pendiente de pago. Se ha generado la factura.";
 
             await addDoc(collection(db, "invoices"), {
                 invoiceNumber: `INV-${Date.now()}`,
@@ -83,14 +90,15 @@ export default function CheckoutPage() {
                     quantity: item.quantity,
                     price: item.price,
                 })),
-                taxRate: 0.19, // Example tax rate
+                taxRate: 0.19,
                 discount: 0,
-                status: 'Pagada',
+                status: invoiceStatus,
+                paymentMethod: paymentMethod,
             });
             
             toast({
-              title: "¡Pago Exitoso!",
-              description: "Tu pedido ha sido procesado y se ha generado la factura.",
+              title: successTitle,
+              description: successDescription,
             });
 
             clearCart();
@@ -134,7 +142,7 @@ export default function CheckoutPage() {
                 <CardDescription>Selecciona cómo quieres pagar tu pedido.</CardDescription>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
+                <RadioGroup value={paymentMethod} onValueChange={(value: "card" | "pse") => setPaymentMethod(value)} className="grid gap-4">
                   <Label htmlFor="card" className="flex items-center gap-4 rounded-md border p-4 hover:bg-accent cursor-pointer has-[[data-state=checked]]:border-primary">
                     <RadioGroupItem value="card" id="card" />
                     <CreditCard className="h-6 w-6" />
@@ -157,8 +165,7 @@ export default function CheckoutPage() {
                 )}
                  {paymentMethod === 'pse' && (
                   <div className="mt-6 text-center">
-                    <p className="text-muted-foreground mb-4">Serás redirigido a la plataforma de PSE para completar tu pago de forma segura.</p>
-                    <Button variant="outline" className="w-full" disabled={loading}>Continuar con PSE</Button>
+                    <p className="text-muted-foreground">Al continuar, generarás una factura con estado pendiente. Serás redirigido a la plataforma de PSE para completar tu pago de forma segura.</p>
                   </div>
                 )}
               </CardContent>
@@ -200,7 +207,11 @@ export default function CheckoutPage() {
               </CardContent>
               <CardFooter>
                  <Button type="submit" className="w-full" size="lg" disabled={isPaymentButtonDisabled}>
-                    {loading ? 'Procesando Pago...' : `Pagar ${finalTotal.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}`}
+                    {loading ? 'Procesando...' : 
+                     paymentMethod === 'card' 
+                        ? `Pagar ${finalTotal.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}`
+                        : `Confirmar Pedido y Pagar con PSE`
+                    }
                 </Button>
               </CardFooter>
             </Card>
