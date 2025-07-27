@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { MoreHorizontal } from "lucide-react";
-import { useEffect, useState } from "react";
+import { MoreHorizontal, ListFilter } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
 import { collection, getDocs } from "firebase/firestore";
 
 import {
@@ -36,6 +37,9 @@ import { Invoice, Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function InvoicesPage() {
+  const searchParams = useSearchParams();
+  const customerId = searchParams.get('customerId');
+
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,16 +68,33 @@ export default function InvoicesPage() {
     return users.find((user) => user.id === id);
   }
 
+  const filteredInvoices = useMemo(() => {
+    if (!customerId) return invoices;
+    return invoices.filter(invoice => invoice.customerId === customerId);
+  }, [invoices, customerId]);
+  
+  const customerName = useMemo(() => {
+    if (!customerId) return null;
+    return getUserById(customerId)?.name;
+  }, [users, customerId]);
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <CardTitle>Facturas</CardTitle>
+            <CardTitle>{customerName ? `Facturas de ${customerName}` : 'Facturas'}</CardTitle>
             <CardDescription>
-              Gestiona tus facturas y sigue su estado.
+               {customerName ? `Un resumen de todas las facturas de ${customerName}.` : 'Gestiona tus facturas y sigue su estado.'}
             </CardDescription>
           </div>
+           {customerId && (
+            <Button asChild variant="outline">
+              <Link href="/invoices">
+                <ListFilter className="mr-2 h-4 w-4" /> Ver Todas las Facturas
+              </Link>
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -102,8 +123,8 @@ export default function InvoicesPage() {
                     <TableCell><Skeleton className="h-8 w-8 rounded-full ml-auto" /></TableCell>
                   </TableRow>
               ))
-            ) : (
-              invoices.map((invoice) => {
+            ) : filteredInvoices.length > 0 ? (
+              filteredInvoices.map((invoice) => {
                 const user = getUserById(invoice.customerId);
                 const subtotal = invoice.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
                 const taxAmount = subtotal * invoice.taxRate;
@@ -145,6 +166,12 @@ export default function InvoicesPage() {
                   </TableRow>
                 );
               })
+            ) : (
+                 <TableRow>
+                    <TableCell colSpan={6} className="text-center h-24">
+                        No se encontraron facturas.
+                    </TableCell>
+                </TableRow>
             )}
           </TableBody>
         </Table>

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PlusCircle, MoreHorizontal } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -161,7 +162,9 @@ export default function CustomersPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                       <DropdownMenuItem>Editar</DropdownMenuItem>
-                      <DropdownMenuItem>Ver Facturas</DropdownMenuItem>
+                       <DropdownMenuItem asChild>
+                          <Link href={`/invoices?customerId=${customer.id}`}>Ver Facturas</Link>
+                        </DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive focus:text-destructive">Eliminar</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
