@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { MoreHorizontal, ListFilter } from "lucide-react";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 
 import {
   Card,
@@ -31,6 +31,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import InvoiceStatusBadge from "@/components/invoice-status-badge";
 import { db } from "@/lib/firebase";
@@ -48,6 +58,8 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -101,6 +113,33 @@ export default function InvoicesPage() {
       }
     };
 
+  const handleOpenDeleteDialog = (invoice: Invoice) => {
+    setDeletingInvoice(invoice);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!deletingInvoice) return;
+    try {
+      await deleteDoc(doc(db, "invoices", deletingInvoice.id));
+      toast({
+        title: "¡Factura Eliminada!",
+        description: `La factura ${deletingInvoice.invoiceNumber} ha sido eliminada correctamente.`,
+      });
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting invoice: ", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la factura.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setDeletingInvoice(null);
+    }
+  };
+
 
   const filteredInvoices = useMemo(() => {
     if (!customerId) return invoices;
@@ -113,6 +152,7 @@ export default function InvoicesPage() {
   }, [users, customerId]);
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
@@ -197,7 +237,11 @@ export default function InvoicesPage() {
                               Marcar como Pagada
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">Eliminar</DropdownMenuItem>
+                          {user?.role === 'admin' && (
+                            <DropdownMenuItem onSelect={() => handleOpenDeleteDialog(invoice)} className="text-destructive focus:text-destructive">
+                              Eliminar
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -215,5 +259,24 @@ export default function InvoicesPage() {
         </Table>
       </CardContent>
     </Card>
+
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás realmente seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+                Esta acción no se puede deshacer. Esto eliminará permanentemente la factura
+                <span className="font-bold"> {deletingInvoice?.invoiceNumber}</span>.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteInvoice} className="bg-destructive hover:bg-destructive/90">
+                Sí, eliminar factura
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
