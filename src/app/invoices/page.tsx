@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { PlusCircle, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -74,12 +74,6 @@ export default function InvoicesPage() {
               Gestiona tus facturas y sigue su estado.
             </CardDescription>
           </div>
-          <Button asChild className="gap-1">
-            <Link href="/invoices/new">
-              <PlusCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">Crear Factura</span>
-            </Link>
-          </Button>
         </div>
       </CardHeader>
       <CardContent>
