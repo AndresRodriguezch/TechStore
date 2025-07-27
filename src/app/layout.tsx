@@ -5,6 +5,7 @@ import { AuthProvider } from '@/contexts/auth-context';
 import AppContent from '@/components/app-content';
 import { CartProvider } from '@/contexts/cart-context';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
   title: 'E-commerce',
@@ -35,6 +36,7 @@ export default function RootLayout({
                 <AppContent>{children}</AppContent>
               </SidebarProvider>
             </CartProvider>
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -10,11 +10,18 @@ import { Gem, PanelLeft, LogOut, User } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 
 export default function AppContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, loading } = useAuth();
   const pathname = usePathname();
 
   const publicPaths = ['/login', '/signup'];
-  if (publicPaths.includes(pathname)) {
+  const isPublicPath = publicPaths.includes(pathname);
+
+  if (loading && !isPublicPath) {
+    // You can return a loading spinner here if you want
+    return null;
+  }
+  
+  if (isPublicPath) {
     return <>{children}</>;
   }
 
