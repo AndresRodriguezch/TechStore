@@ -5,7 +5,9 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlusCircle, MoreHorizontal } from "lucide-react";
-import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,7 +18,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
@@ -38,9 +40,112 @@ function AccessDenied() {
   )
 }
 
+// Component for the Add Customer Form
+const AddCustomerForm = ({ onCustomerAdded, closeDialog }: { onCustomerAdded: () => void, closeDialog: () => void }) => {
+  const { toast } = useToast();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleAddCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+     if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Create user document in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        name: name,
+        email: email,
+        phone: phone,
+        address: {
+          street: address,
+          city: city,
+          country: country,
+        },
+        role: 'user' // New customers are always 'user'
+      });
+      
+      toast({
+        title: "¡Cliente Añadido!",
+        description: "El nuevo cliente ha sido creado exitosamente.",
+      });
+
+      onCustomerAdded(); // Refresh customer list
+      closeDialog(); // Close the dialog
+
+    } catch (error: any) {
+      console.error(error);
+      if (error.code === 'auth/email-already-in-use') {
+        setError('Este correo electrónico ya está en uso.');
+      } else {
+        setError('Ocurrió un error al crear el cliente.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleAddCustomer}>
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="name" className="text-right">Nombre</Label>
+          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="email" className="text-right">Correo</Label>
+          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="password" className="text-right">Contraseña</Label>
+          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="phone" className="text-right">Teléfono</Label>
+          <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="address" className="text-right">Dirección</Label>
+          <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="city" className="text-right">Ciudad</Label>
+          <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} required className="col-span-3" />
+        </div>
+         <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="country" className="text-right">País</Label>
+          <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} required className="col-span-3" />
+        </div>
+         {error && <p className="col-span-4 text-sm text-center text-destructive">{error}</p>}
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={closeDialog} type="button">Cancelar</Button>
+        <Button type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar Cliente'}</Button>
+      </DialogFooter>
+    </form>
+  )
+}
+
+
 export default function CustomersPage() {
   const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
   const { toast } = useToast();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -120,6 +225,8 @@ export default function CustomersPage() {
     if (!deletingCustomer) return;
 
     try {
+      // Note: This does not delete the user from Firebase Auth, only Firestore.
+      // Deleting from Auth requires a backend function for security reasons.
       await deleteDoc(doc(db, "users", deletingCustomer.id));
       toast({
         title: "¡Cliente Eliminado!",
@@ -165,34 +272,17 @@ export default function CustomersPage() {
                 <span className="hidden sm:inline">Añadir Cliente</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Añadir Nuevo Cliente</DialogTitle>
                 <DialogDescription>
                   Rellena los detalles a continuación para crear un nuevo perfil de cliente.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">Nombre</Label>
-                  <Input id="name" placeholder="John Doe" className="col-span-3" />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">Correo Electrónico</Label>
-                  <Input id="email" type="email" placeholder="john@example.com" className="col-span-3" />
-                </div>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="phone" className="text-right">Teléfono</Label>
-                  <Input id="phone" placeholder="123-456-7890" className="col-span-3" />
-                </div>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="company" className="text-right">Empresa</Label>
-                  <Input id="company" placeholder="Doe Inc." className="col-span-3" />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit" onClick={() => setIsAddDialogOpen(false)}>Guardar Cliente</Button>
-              </DialogFooter>
+              <AddCustomerForm 
+                onCustomerAdded={fetchCustomers}
+                closeDialog={() => setIsAddDialogOpen(false)}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -303,7 +393,7 @@ export default function CustomersPage() {
             <AlertDialogDescription>
                 Esta acción no se puede deshacer. Esto eliminará permanentemente al cliente
                 <span className="font-bold"> {deletingCustomer?.name} </span>
-                y todos sus datos asociados del sistema.
+                y todos sus datos asociados del sistema. Ten en cuenta que esto no elimina al usuario del sistema de autenticación de Firebase.
             </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
