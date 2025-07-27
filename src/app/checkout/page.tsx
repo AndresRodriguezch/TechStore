@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -23,6 +24,8 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [loading, setLoading] = useState(false);
+  const [isCardFormValid, setIsCardFormValid] = useState(false);
+
 
   const subtotal = total;
   const taxAmount = subtotal * 0.19;
@@ -48,6 +51,16 @@ export default function CheckoutPage() {
   
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (paymentMethod === 'card' && !isCardFormValid) {
+        toast({
+            title: "Formulario inválido",
+            description: "Por favor, completa correctamente los datos de tu tarjeta.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     setLoading(true);
 
     // Simulate payment processing
@@ -102,6 +115,8 @@ export default function CheckoutPage() {
         setLoading(false);
     }
   }
+  
+  const isPaymentButtonDisabled = loading || !user || (paymentMethod === 'card' && !isCardFormValid);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -134,7 +149,10 @@ export default function CheckoutPage() {
 
                 {paymentMethod === 'card' && (
                   <div className="mt-6">
-                    <CreditCardForm disabled={loading} />
+                    <CreditCardForm 
+                        disabled={loading}
+                        onValidationChange={setIsCardFormValid}
+                    />
                   </div>
                 )}
                  {paymentMethod === 'pse' && (
@@ -181,7 +199,7 @@ export default function CheckoutPage() {
                 </div>
               </CardContent>
               <CardFooter>
-                 <Button type="submit" className="w-full" size="lg" disabled={loading || !user}>
+                 <Button type="submit" className="w-full" size="lg" disabled={isPaymentButtonDisabled}>
                     {loading ? 'Procesando Pago...' : `Pagar ${finalTotal.toLocaleString("es-CO", { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}`}
                 </Button>
               </CardFooter>
