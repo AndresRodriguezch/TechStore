@@ -86,7 +86,8 @@ export default function CustomersPage() {
 
     try {
       const userDocRef = doc(db, "users", editingCustomer.id);
-      await updateDoc(userDocRef, { role: newRole });
+      // Ensure we only update the role
+      await updateDoc(userDocRef, { role: newRole }); 
       toast({
         title: "¡Rol actualizado!",
         description: `El rol de ${editingCustomer.name} ha sido cambiado a ${newRole}.`,
@@ -205,7 +206,7 @@ export default function CustomersPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      <DropdownMenuItem onSelect={() => handleOpenEditDialog(customer)}>Editar</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => handleOpenEditDialog(customer)}>Editar Rol</DropdownMenuItem>
                        <DropdownMenuItem asChild>
                           <Link href={`/invoices?customerId=${customer.id}`}>Ver Facturas</Link>
                         </DropdownMenuItem>
@@ -226,21 +227,21 @@ export default function CustomersPage() {
         <DialogHeader>
           <DialogTitle>Editar Rol de Usuario</DialogTitle>
           <DialogDescription>
-            Cambia el rol de {editingCustomer?.name}.
+            Cambia el rol de {editingCustomer?.name}. Solo el rol puede ser modificado.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="edit-name" className="text-right">Nombre</Label>
-            <Input id="edit-name" value={editingCustomer?.name} readOnly className="col-span-3" />
+            <Input id="edit-name" value={editingCustomer?.name ?? ''} readOnly className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="edit-email" className="text-right">Correo</Label>
-            <Input id="edit-email" value={editingCustomer?.email} readOnly className="col-span-3" />
+            <Input id="edit-email" value={editingCustomer?.email ?? ''} readOnly className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="role" className="text-right">Rol</Label>
-             <Select onValueChange={(value: 'admin' | 'user') => setNewRole(value)} defaultValue={editingCustomer?.role}>
+             <Select onValueChange={(value: 'admin' | 'user') => setNewRole(value)} defaultValue={editingCustomer?.role ?? 'user'}>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Selecciona un rol" />
                 </SelectTrigger>
@@ -260,3 +261,5 @@ export default function CustomersPage() {
     </>
   );
 }
+
+    
