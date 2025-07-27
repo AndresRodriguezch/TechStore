@@ -48,7 +48,8 @@ export default function CustomersPage() {
     if (user) {
       const fetchCustomers = async () => {
         try {
-          const querySnapshot = await getDocs(collection(db, "customers"));
+          // Fetch from 'users' collection instead of 'customers'
+          const querySnapshot = await getDocs(collection(db, "users"));
           const customersData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
           setCustomers(customersData);
         } catch (error) {
@@ -123,7 +124,7 @@ export default function CustomersPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
-              <TableHead className="hidden sm:table-cell">Empresa</TableHead>
+              <TableHead className="hidden sm:table-cell">Rol</TableHead>
               <TableHead className="hidden md:table-cell">Correo Electrónico</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>
@@ -146,7 +147,7 @@ export default function CustomersPage() {
               customers.map((customer) => (
               <TableRow key={customer.id}>
                 <TableCell className="font-medium">{customer.name}</TableCell>
-                <TableCell className="hidden sm:table-cell">{customer.company}</TableCell>
+                <TableCell className="hidden sm:table-cell capitalize">{customer.role}</TableCell>
                 <TableCell className="hidden md:table-cell">{customer.email}</TableCell>
                 <TableCell>{customer.phone}</TableCell>
                 <TableCell>
