@@ -1,5 +1,7 @@
+
 "use client";
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarInset, SidebarTrigger, SidebarRail } from '@/components/ui/sidebar';
@@ -72,7 +74,9 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
               <DropdownMenuContent className="w-56 mb-2" align="end" side="top">
                 <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Perfil</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Perfil</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>Configuración</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Cerrar Sesión</DropdownMenuItem>
