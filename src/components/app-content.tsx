@@ -77,7 +77,6 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
                 <DropdownMenuItem asChild>
                   <Link href="/profile">Perfil</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>Configuración</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Cerrar Sesión</DropdownMenuItem>
               </DropdownMenuContent>
