@@ -1,10 +1,11 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlusCircle, MoreHorizontal } from "lucide-react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,10 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db } from "@/lib/firebase";
 import { Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/hooks/use-toast";
 
 function AccessDenied() {
   return (
@@ -37,9 +40,30 @@ function AccessDenied() {
 export default function CustomersPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
+  const { toast } = useToast();
+
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // State for Add Customer Dialog
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  // State for Edit Role Dialog
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [newRole, setNewRole] = useState<'admin' | 'user'>('user');
+
+  const fetchCustomers = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const customersData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
+      setCustomers(customersData);
+    } catch (error) {
+      console.error("Error fetching customers: ", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && user?.role !== 'admin') {
@@ -47,21 +71,40 @@ export default function CustomersPage() {
     }
     
     if (user) {
-      const fetchCustomers = async () => {
-        try {
-          // Fetch from 'users' collection instead of 'customers'
-          const querySnapshot = await getDocs(collection(db, "users"));
-          const customersData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
-          setCustomers(customersData);
-        } catch (error) {
-          console.error("Error fetching customers: ", error);
-        } finally {
-          setLoading(false);
-        }
-      };
       fetchCustomers();
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading]);
+
+  const handleOpenEditDialog = (customer: Customer) => {
+    setEditingCustomer(customer);
+    setNewRole(customer.role || 'user');
+    setIsEditDialogOpen(true);
+  };
+
+  const handleRoleChange = async () => {
+    if (!editingCustomer) return;
+
+    try {
+      const userDocRef = doc(db, "users", editingCustomer.id);
+      await updateDoc(userDocRef, { role: newRole });
+      toast({
+        title: "¡Rol actualizado!",
+        description: `El rol de ${editingCustomer.name} ha sido cambiado a ${newRole}.`,
+      });
+      setIsEditDialogOpen(false);
+      setEditingCustomer(null);
+      // Refetch customers to show the updated role
+      fetchCustomers(); 
+    } catch (error) {
+      console.error("Error updating role: ", error);
+       toast({
+        title: "Error",
+        description: "No se pudo actualizar el rol del cliente.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   if (authLoading) {
     return <p>Cargando...</p>;
@@ -72,6 +115,7 @@ export default function CustomersPage() {
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
@@ -81,7 +125,7 @@ export default function CustomersPage() {
               Gestiona tus clientes y mira sus detalles.
             </CardDescription>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-1">
                 <PlusCircle className="h-4 w-4" />
@@ -114,7 +158,7 @@ export default function CustomersPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" onClick={() => setOpen(false)}>Guardar Cliente</Button>
+                <Button type="submit" onClick={() => setIsAddDialogOpen(false)}>Guardar Cliente</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -161,7 +205,7 @@ export default function CustomersPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => handleOpenEditDialog(customer)}>Editar</DropdownMenuItem>
                        <DropdownMenuItem asChild>
                           <Link href={`/invoices?customerId=${customer.id}`}>Ver Facturas</Link>
                         </DropdownMenuItem>
@@ -175,5 +219,44 @@ export default function CustomersPage() {
         </Table>
       </CardContent>
     </Card>
+
+    {/* Edit Role Dialog */}
+    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Editar Rol de Usuario</DialogTitle>
+          <DialogDescription>
+            Cambia el rol de {editingCustomer?.name}.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-name" className="text-right">Nombre</Label>
+            <Input id="edit-name" value={editingCustomer?.name} readOnly className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-email" className="text-right">Correo</Label>
+            <Input id="edit-email" value={editingCustomer?.email} readOnly className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="role" className="text-right">Rol</Label>
+             <Select onValueChange={(value: 'admin' | 'user') => setNewRole(value)} defaultValue={editingCustomer?.role}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecciona un rol" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
+          <Button onClick={handleRoleChange}>Guardar Cambios</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
