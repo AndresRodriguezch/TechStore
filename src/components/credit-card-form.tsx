@@ -108,7 +108,7 @@ const CreditCardForm = ({ disabled = false, onValidationChange }: CreditCardForm
         focused={cardData.focus as Focused}
       />
       <Form {...form}>
-        <form className="mt-6 grid gap-4">
+        <div className="mt-6 grid gap-4">
           <FormField
             control={form.control}
             name="number"
@@ -198,7 +198,7 @@ const CreditCardForm = ({ disabled = false, onValidationChange }: CreditCardForm
                 )}
             />
           </div>
-        </form>
+        </div>
       </Form>
     </div>
   );
