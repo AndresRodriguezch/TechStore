@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Mail, Phone, Home } from "lucide-react";
+import Link from "next/link";
 
 export default function ProfilePage() {
     const { user, loading } = useAuth();
@@ -75,7 +76,9 @@ export default function ProfilePage() {
                     )}
                 </div>
                 <div className="pt-4 flex justify-end">
-                    <Button variant="outline">Editar Perfil</Button>
+                    <Button variant="outline" asChild>
+                        <Link href="/profile/edit">Editar Perfil</Link>
+                    </Button>
                 </div>
             </CardContent>
         </Card>
