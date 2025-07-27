@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -5,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { MoreHorizontal, ListFilter } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 
 import {
   Card,
@@ -35,38 +36,71 @@ import InvoiceStatusBadge from "@/components/invoice-status-badge";
 import { db } from "@/lib/firebase";
 import { Invoice, Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/hooks/use-toast";
 
 export default function InvoicesPage() {
   const searchParams = useSearchParams();
   const customerId = searchParams.get('customerId');
 
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [users, setUsers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [invoicesSnapshot, usersSnapshot] = await Promise.all([
+        getDocs(collection(db, "invoices")),
+        getDocs(collection(db, "users")),
+      ]);
+      const invoicesData = invoicesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Invoice));
+      const usersData = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
+      setInvoices(invoicesData);
+      setUsers(usersData);
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+       toast({
+        title: "Error",
+        description: "No se pudieron cargar los datos.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [invoicesSnapshot, usersSnapshot] = await Promise.all([
-          getDocs(collection(db, "invoices")),
-          getDocs(collection(db, "users")),
-        ]);
-        const invoicesData = invoicesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Invoice));
-        const usersData = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
-        setInvoices(invoicesData);
-        setUsers(usersData);
-      } catch (error) {
-        console.error("Error fetching data: ", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const getUserById = (id: string) => {
     return users.find((user) => user.id === id);
   }
+  
+  const handleMarkAsPaid = async (invoiceId: string) => {
+      try {
+        const invoiceRef = doc(db, "invoices", invoiceId);
+        await updateDoc(invoiceRef, {
+          status: "Pagada",
+        });
+        toast({
+          title: "Factura Actualizada",
+          description: "La factura ha sido marcada como pagada.",
+        });
+        fetchData(); // Refetch data to show updated status
+      } catch (error) {
+        console.error("Error updating invoice status: ", error);
+        toast({
+          title: "Error",
+          description: "No se pudo actualizar el estado de la factura.",
+          variant: "destructive",
+        });
+      }
+    };
+
 
   const filteredInvoices = useMemo(() => {
     if (!customerId) return invoices;
@@ -125,7 +159,7 @@ export default function InvoicesPage() {
               ))
             ) : filteredInvoices.length > 0 ? (
               filteredInvoices.map((invoice) => {
-                const user = getUserById(invoice.customerId);
+                const customer = getUserById(invoice.customerId);
                 const subtotal = invoice.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
                 const taxAmount = subtotal * invoice.taxRate;
                 const total = subtotal + taxAmount - invoice.discount;
@@ -137,7 +171,7 @@ export default function InvoicesPage() {
                         {invoice.invoiceNumber}
                       </Link>
                     </TableCell>
-                    <TableCell>{user?.name}</TableCell>
+                    <TableCell>{customer?.name}</TableCell>
                     <TableCell className="hidden md:table-cell">
                       {format(new Date(invoice.dueDate), "PPP", { locale: es })}
                     </TableCell>
@@ -158,7 +192,11 @@ export default function InvoicesPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                           <DropdownMenuItem asChild><Link href={`/invoices/${invoice.id}`}>Ver Detalles</Link></DropdownMenuItem>
-                          <DropdownMenuItem>Marcar como Pagada</DropdownMenuItem>
+                          {user?.role === 'admin' && invoice.status === 'Pendiente' && (
+                            <DropdownMenuItem onSelect={() => handleMarkAsPaid(invoice.id)}>
+                              Marcar como Pagada
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem className="text-destructive focus:text-destructive">Eliminar</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
