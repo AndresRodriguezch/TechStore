@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/auth-context';
 import AppContent from '@/components/app-content';
 import { CartProvider } from '@/contexts/cart-context';
@@ -37,7 +36,6 @@ export default function RootLayout({
               </SidebarProvider>
             </CartProvider>
           </AuthProvider>
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>

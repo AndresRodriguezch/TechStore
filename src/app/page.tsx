@@ -11,12 +11,14 @@ import { db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/contexts/cart-context";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -35,6 +37,14 @@ export default function Home() {
   }, []);
 
   const handleAddToCart = (product: Product) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Inicia Sesión",
+        description: "Debes iniciar sesión para añadir productos al carrito.",
+        variant: "destructive",
+      });
+      return;
+    }
     addToCart(product);
     toast({
       title: "¡Producto añadido!",

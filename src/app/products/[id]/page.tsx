@@ -26,7 +26,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (!params.id) return;
@@ -52,6 +52,14 @@ export default function ProductDetailPage() {
   }, [params.id]);
 
   const handleAddToCart = (product: Product) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Inicia Sesión",
+        description: "Debes iniciar sesión para añadir productos al carrito.",
+        variant: "destructive",
+      });
+      return;
+    }
     addToCart(product);
     toast({
       title: "¡Producto añadido!",

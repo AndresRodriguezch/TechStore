@@ -21,7 +21,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -54,6 +54,14 @@ export default function ProductsPage() {
   }, [products, searchTerm, selectedCategory]);
 
   const handleAddToCart = (product: Product) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Inicia Sesión",
+        description: "Debes iniciar sesión para añadir productos al carrito.",
+        variant: "destructive",
+      });
+      return;
+    }
     addToCart(product);
     toast({
       title: "¡Producto añadido!",
