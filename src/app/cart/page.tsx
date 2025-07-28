@@ -13,6 +13,15 @@ import { useCart } from "@/contexts/cart-context";
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, total, clearCart } = useCart();
 
+  const handleQuantityChange = (itemId: string, value: string) => {
+    const newQuantity = parseInt(value, 10);
+    // Only update if it's a valid number.
+    // If the input is empty, NaN is produced, so we don't update.
+    if (!isNaN(newQuantity)) {
+      updateQuantity(itemId, newQuantity);
+    }
+  };
+
   if (cart.length === 0) {
     return (
       <Card className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm min-h-[calc(100vh-8rem)]">
@@ -61,8 +70,8 @@ export default function CartPage() {
                         type="number"
                         min="1"
                         max={item.stock}
-                        value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10))}
+                        value={item.quantity || ''}
+                        onChange={(e) => handleQuantityChange(item.id, e.target.value)}
                         className="w-16 h-9 text-center"
                         aria-label={`Cantidad de ${item.name}`}
                       />
