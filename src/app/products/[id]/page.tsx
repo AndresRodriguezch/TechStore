@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -104,7 +103,7 @@ export default function ProductDetailPage() {
         </Button>
       </div>
       <Card className="overflow-hidden">
-        <div className="grid md:grid-cols-2 md:gap-6 lg:gap-12 items-start">
+        <div className="grid md:grid-cols-2 md:gap-6 lg:gap-12 items-center">
           <CardHeader className="p-0">
             <Image
               src={product.imageUrl}
