@@ -60,7 +60,7 @@ const CreditCardForm = ({ disabled = false, onValidationChange }: CreditCardForm
     },
   });
 
-  const { formState, watch, setValue, setFocus } = form;
+  const { formState, watch, setValue } = form;
   const cardData = watch();
 
   React.useEffect(() => {
@@ -95,7 +95,7 @@ const CreditCardForm = ({ disabled = false, onValidationChange }: CreditCardForm
   }
   
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    setFocus(e.target.name as keyof CreditCardFormValues);
+    setValue('focus', e.target.name as Focused);
   }
 
   return (
