@@ -74,7 +74,7 @@ export default function ProductDetailPage() {
             <Card>
                 <div className="grid md:grid-cols-2 gap-8">
                     <CardHeader>
-                        <Skeleton className="w-full h-96 rounded-lg" />
+                        <Skeleton className="w-full h-64 md:h-96 rounded-lg" />
                     </CardHeader>
                     <CardContent className="py-6 space-y-6">
                         <Skeleton className="h-8 w-3/4" />
@@ -103,24 +103,24 @@ export default function ProductDetailPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Volver
         </Button>
       </div>
-      <Card>
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-center">
-          <CardHeader className="p-0 flex items-center justify-center">
+      <Card className="overflow-hidden">
+        <div className="grid md:grid-cols-2 md:gap-6 lg:gap-12 items-start">
+          <CardHeader className="p-0">
             <Image
               src={product.imageUrl}
               alt={product.name}
               width={800}
               height={800}
-              className="w-full h-auto max-h-[500px] object-contain rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+              className="w-full h-auto max-h-[300px] md:max-h-[500px] object-contain"
               data-ai-hint="product image"
             />
           </CardHeader>
-          <CardContent className="py-6 space-y-4">
+          <CardContent className="p-4 md:p-6 space-y-4">
             <div>
               <Badge variant="outline" className="mb-2">{product.category}</Badge>
-              <CardTitle className="text-3xl lg:text-4xl font-bold">{product.name}</CardTitle>
+              <CardTitle className="text-2xl md:text-3xl lg:text-4xl font-bold">{product.name}</CardTitle>
             </div>
-            <p className="text-3xl font-semibold">
+            <p className="text-2xl md:text-3xl font-semibold">
                 {product.price.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}
             </p>
             <Separator />
@@ -131,7 +131,7 @@ export default function ProductDetailPage() {
             <div className="text-sm text-muted-foreground">
                 <span className="font-semibold text-foreground">Disponibilidad:</span> {product.stock > 0 ? `${product.stock} en stock` : 'Agotado'}
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Button size="lg" className="flex-1" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
                 Añadir al Carrito
               </Button>
@@ -141,7 +141,7 @@ export default function ProductDetailPage() {
       </Card>
       
       {user?.role === 'admin' && (
-        <div className="mt-6 flex justify-end gap-4">
+        <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-2">
           <Button variant="outline" asChild>
             <Link href={`/products/${product.id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />
