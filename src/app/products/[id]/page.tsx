@@ -103,14 +103,14 @@ export default function ProductDetailPage() {
         </Button>
       </div>
       <Card className="overflow-hidden">
-        <div className="grid md:grid-cols-2 md:gap-6 lg:gap-12 items-center">
-          <CardHeader className="p-0">
+        <div className="grid md:grid-cols-2 md:gap-6 lg:gap-12 md:items-center">
+          <CardHeader className="p-0 flex items-center justify-center">
             <Image
               src={product.imageUrl}
               alt={product.name}
               width={800}
               height={800}
-              className="w-full h-auto max-h-[300px] md:max-h-[500px] object-contain"
+              className="w-full h-auto max-h-[300px] md:max-h-[500px] object-contain dark:mix-blend-multiply"
               data-ai-hint="product image"
             />
           </CardHeader>

@@ -137,7 +137,7 @@ export default function ProductsPage() {
                   alt={product.name}
                   width={600}
                   height={400}
-                  className="w-full h-full object-contain p-2"
+                  className="w-full h-full object-contain p-2 dark:mix-blend-multiply"
                   data-ai-hint="product image"
                 />
               </CardHeader>
