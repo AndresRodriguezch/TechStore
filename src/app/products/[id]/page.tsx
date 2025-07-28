@@ -132,7 +132,7 @@ export default function ProductDetailPage() {
                 <span className="font-semibold text-foreground">Disponibilidad:</span> {product.stock > 0 ? `${product.stock} en stock` : 'Agotado'}
             </div>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <Button size="lg" className="flex-1" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
+              <Button size="lg" className="flex-1 text-base sm:text-sm py-6 sm:py-2" onClick={() => handleAddToCart(product)} disabled={product.stock === 0}>
                 Añadir al Carrito
               </Button>
             </div>
