@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PlusCircle, MoreHorizontal } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Eye, EyeOff } from "lucide-react";
 import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
@@ -46,6 +46,7 @@ const AddCustomerForm = ({ onCustomerAdded, closeDialog }: { onCustomerAdded: ()
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -114,8 +115,24 @@ const AddCustomerForm = ({ onCustomerAdded, closeDialog }: { onCustomerAdded: ()
           <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="col-span-3" />
         </div>
         <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="password" className="text-right">Contraseña</Label>
-          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="col-span-3" />
+            <Label htmlFor="password" className="text-right">Contraseña</Label>
+            <div className="relative col-span-3">
+                <Input 
+                id="password" 
+                type={showPassword ? 'text' : 'password'} 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required 
+                className="pr-10"
+                />
+                <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+            </div>
         </div>
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="phone" className="text-right">Teléfono</Label>
