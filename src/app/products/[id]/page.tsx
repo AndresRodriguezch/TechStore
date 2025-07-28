@@ -110,7 +110,7 @@ export default function ProductDetailPage() {
               alt={product.name}
               width={800}
               height={800}
-              className="w-full h-auto max-h-[300px] md:max-h-[500px] object-contain dark:mix-blend-multiply"
+              className="w-full h-auto max-h-[300px] md:max-h-[500px] object-contain"
               data-ai-hint="product image"
             />
           </CardHeader>
