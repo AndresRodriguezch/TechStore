@@ -8,7 +8,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'E-commerce',
+  title: 'TechStore',
   description: 'Gestiona clientes y facturas con facilidad.',
 };
 

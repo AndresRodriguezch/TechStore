@@ -41,7 +41,7 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
                 <Gem className="h-7 w-7" />
               </Button>
               <div className="flex-grow overflow-hidden group-data-[collapsible=icon]:hidden">
-                <h1 className="text-xl font-semibold truncate">E-commerce</h1>
+                <h1 className="text-xl font-semibold truncate">TechStore</h1>
               </div>
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-card px-6 sticky top-0 z-10 md:hidden print:hidden">
           <SidebarTrigger />
-          <h1 className="text-lg font-semibold">E-commerce</h1>
+          <h1 className="text-lg font-semibold">TechStore</h1>
         </header>
         <main className="flex-1 p-4 sm:p-6 print:p-0">{children}</main>
       </SidebarInset>

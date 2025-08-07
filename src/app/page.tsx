@@ -55,7 +55,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-6">
       <header className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">Bienvenido a E-commerce</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Bienvenido a TechStore</h1>
         <p className="text-muted-foreground mt-2">
           Explora nuestra selección de los mejores productos tecnológicos.
         </p>
@@ -86,7 +86,7 @@ export default function Home() {
                   alt={product.name}
                   width={600}
                   height={400}
-                  className="w-full h-full object-contain p-2 dark:bg-white dark:p-2 dark:rounded-md"
+                  className="w-full h-full object-contain dark:bg-white dark:p-2 dark:rounded-md"
                   data-ai-hint="product image"
                 />
               </CardHeader>
