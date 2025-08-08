@@ -4,7 +4,7 @@
 import { notFound, useParams } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { doc, getDoc } from "firebase/firestore";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -16,51 +16,64 @@ import { Gem, CreditCard, Banknote } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { Invoice, Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getInvoiceById } from "../actions";
+import { useAuth } from "@/contexts/auth-context";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function InvoiceDetailPage() {
   const params = useParams<{ id: string }>();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    if (!params.id) return;
+  const fetchInvoice = useCallback(async () => {
+    if (!params.id || !user) return;
+    setLoading(true);
 
-    const fetchInvoice = async () => {
-      try {
-        const invoiceRef = doc(db, "invoices", params.id);
-        const invoiceSnap = await getDoc(invoiceRef);
-
-        if (invoiceSnap.exists()) {
-          const invoiceData = { id: invoiceSnap.id, ...invoiceSnap.data() } as Invoice;
-          setInvoice(invoiceData);
-
-          const userRef = doc(db, "users", invoiceData.customerId);
-          const userSnap = await getDoc(userRef);
-
-          if (userSnap.exists()) {
-            setCustomer({ id: userSnap.id, ...userSnap.data() } as Customer);
-          } else {
-             // Handle case where customer was deleted
-            setCustomer({
-              id: invoiceData.customerId,
+    try {
+      const { invoice, customer } = await getInvoiceById(params.id);
+      
+       if (invoice) {
+        setInvoice(invoice);
+        if (customer) {
+            setCustomer(customer);
+        } else {
+             // Handle case where customer might have been deleted
+             setCustomer({
+              id: invoice.customerId,
               name: 'Cliente Eliminado',
               email: 'No disponible',
               phone: 'No disponible',
             });
-          }
-        } else {
-          console.error("No such invoice!");
         }
-      } catch (error) {
-        console.error("Error fetching document: ", error);
-      } finally {
-        setLoading(false);
+      } else {
+         toast({
+          title: "Error",
+          description: "No se pudo encontrar la factura o no tienes permiso para verla.",
+          variant: "destructive"
+        });
+        setInvoice(null);
+        setCustomer(null);
       }
-    };
-    
+
+    } catch (error) {
+      console.error("Error fetching document: ", error);
+       toast({
+          title: "Error",
+          description: "Ocurrió un error al cargar la factura.",
+          variant: "destructive"
+        });
+    } finally {
+      setLoading(false);
+    }
+  }, [params.id, user, toast]);
+
+  useEffect(() => {
     fetchInvoice();
-  }, [params.id]);
+  }, [fetchInvoice]);
 
   if (loading) {
     return (
@@ -97,7 +110,16 @@ export default function InvoiceDetailPage() {
   }
 
   if (!invoice || !customer) {
-    notFound();
+    // notFound() is for static generation, better to show a message for dynamic pages
+    return (
+        <Card>
+            <CardHeader>
+                <CardContent className="text-center p-8">
+                     <p>Factura no encontrada o acceso denegado.</p>
+                </CardContent>
+            </CardHeader>
+        </Card>
+    );
   }
 
   const subtotal = invoice.items.reduce((acc, item) => acc + item.quantity * item.price, 0);
