@@ -35,40 +35,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const fetchUserData = async (firebaseUser: FirebaseUser) => {
+      const userDocRef = doc(db, "users", firebaseUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email!,
+          name: userData.name,
+          role: userData.role,
+          phone: userData.phone,
+          address: userData.address,
+        });
+      } else {
+        setUser({ uid: firebaseUser.uid, email: firebaseUser.email! });
+      }
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      setLoading(true); // Start loading when auth state changes
+      setLoading(true);
       if (firebaseUser) {
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email!,
-            name: userData.name,
-            role: userData.role,
-            phone: userData.phone,
-            address: userData.address,
-          });
-        } else {
-          // If user exists in Auth but not in Firestore, handle it
-          setUser({ uid: firebaseUser.uid, email: firebaseUser.email! });
-        }
+        await fetchUserData(firebaseUser);
       } else {
         setUser(null);
       }
-      setLoading(false); // Finish loading after user state is set
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
   const login = async (email: string, pass: string) => {
+    setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
+      const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+      // After successful sign-in, onAuthStateChanged will trigger,
+      // but we can also fetch data immediately to ensure state is updated.
+      if (userCredential.user) {
+          await fetchUserData(userCredential.user);
+      }
+      setLoading(false);
       return { success: true };
     } catch (error: any) {
+       setLoading(false);
        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         return { success: false, message: 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.' };
       }
