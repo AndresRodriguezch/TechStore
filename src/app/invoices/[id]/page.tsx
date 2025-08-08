@@ -16,7 +16,6 @@ import { Gem, CreditCard, Banknote } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { Invoice, Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getInvoiceById } from "../actions";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,40 +29,54 @@ export default function InvoiceDetailPage() {
   const { toast } = useToast();
 
   const fetchInvoice = useCallback(async () => {
-    if (!params.id || !user) return;
+    if (!params.id) return;
     setLoading(true);
 
     try {
-      const { invoice, customer } = await getInvoiceById(params.id);
-      
-       if (invoice) {
-        setInvoice(invoice);
-        if (customer) {
-            setCustomer(customer);
-        } else {
-             // Handle case where customer might have been deleted
-             setCustomer({
-              id: invoice.customerId,
-              name: 'Cliente Eliminado',
-              email: 'No disponible',
-              phone: 'No disponible',
+      const invoiceRef = doc(db, 'invoices', params.id);
+      const invoiceSnap = await getDoc(invoiceRef);
+
+      if (invoiceSnap.exists()) {
+        const invoiceData = { id: invoiceSnap.id, ...invoiceSnap.data() } as Invoice;
+
+        // The new security rules handle this, but an extra check here is good practice.
+        if (user?.role !== 'admin' && invoiceData.customerId !== user?.uid) {
+            toast({
+              title: "Acceso Denegado",
+              description: "No tienes permiso para ver esta factura.",
+              variant: "destructive"
             });
+            setInvoice(null);
+            setCustomer(null);
+        } else {
+            setInvoice(invoiceData);
+            const customerRef = doc(db, 'users', invoiceData.customerId);
+            const customerSnap = await getDoc(customerRef);
+            if (customerSnap.exists()) {
+                setCustomer({ id: customerSnap.id, ...customerSnap.data() } as Customer);
+            } else {
+                setCustomer({
+                  id: invoiceData.customerId,
+                  name: 'Cliente Eliminado',
+                  email: 'No disponible',
+                  phone: 'No disponible',
+                });
+            }
         }
       } else {
          toast({
           title: "Error",
-          description: "No se pudo encontrar la factura o no tienes permiso para verla.",
+          description: "No se pudo encontrar la factura.",
           variant: "destructive"
         });
         setInvoice(null);
         setCustomer(null);
       }
-
     } catch (error) {
       console.error("Error fetching document: ", error);
        toast({
-          title: "Error",
-          description: "Ocurrió un error al cargar la factura.",
+          title: "Error de Permisos",
+          description: "No se pudo cargar la factura. Revisa las reglas de seguridad de tu base de datos.",
           variant: "destructive"
         });
     } finally {

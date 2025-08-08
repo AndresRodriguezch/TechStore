@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if a user is an admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // ANY authenticated user can create their own user document (on signup)
+      allow create: if request.auth != null;
+
+      // A user can READ or UPDATE their OWN document.
+      // An admin can read or update any user document.
+      allow read, update: if request.auth.uid == userId || isAdmin();
+      
+      // An admin can list all users. A user CANNOT list all users.
+      allow list: if isAdmin();
+      
+      // An admin can delete any user.
+      allow delete: if isAdmin();
+    }
+    
+    // Invoices collection
+    match /invoices/{invoiceId} {
+        // ANY authenticated user can create an invoice (on checkout)
+        allow create: if request.auth != null;
+        
+        // A user can read their OWN invoices. An ADMIN can read ANY invoice.
+        allow read: if (request.auth.uid == resource.data.customerId || isAdmin());
+        
+        // A user can list their OWN invoices. An ADMIN can list ANY invoice.
+        allow list: if (request.resource == null && isAdmin()) || (request.auth.uid == request.query.filters[0].value);
+
+        // ONLY an admin can update or delete invoices
+        allow update, delete: if isAdmin();
+    }
+    
+    // Products collection
+    match /products/{productId} {
+        // ANYONE can read the products
+        allow read, list: if true;
+        
+        // ONLY an admin can create, update, or delete products
+        allow write: if isAdmin();
+    }
+  }
+}
