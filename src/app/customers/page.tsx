@@ -1,15 +1,15 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PlusCircle, MoreHorizontal, Eye, EyeOff } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
 import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import { deleteUser } from "./actions";
 
 function AccessDenied() {
   return (
@@ -167,6 +168,9 @@ export default function CustomersPage() {
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
 
   // State for Add Customer Dialog
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -242,25 +246,40 @@ export default function CustomersPage() {
     if (!deletingCustomer) return;
 
     try {
-      // Note: This does not delete the user from Firebase Auth, only Firestore.
-      // Deleting from Auth requires a backend function for security reasons.
-      await deleteDoc(doc(db, "users", deletingCustomer.id));
-      toast({
-        title: "¡Cliente Eliminado!",
-        description: `El cliente ${deletingCustomer.name} ha sido eliminado del sistema.`,
-      });
-      setIsDeleteDialogOpen(false);
-      setDeletingCustomer(null);
-      fetchCustomers();
+      const result = await deleteUser(deletingCustomer.id);
+      if (result.success) {
+        toast({
+          title: "¡Cliente Eliminado!",
+          description: `El cliente ${deletingCustomer.name} ha sido eliminado del sistema.`,
+        });
+        fetchCustomers();
+      } else {
+         toast({
+          title: "Error",
+          description: result.message || "No se pudo eliminar el cliente.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
        console.error("Error deleting customer: ", error);
        toast({
         title: "Error",
-        description: "No se pudo eliminar el cliente.",
+        description: "Ocurrió un error inesperado.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setDeletingCustomer(null);
     }
   };
+
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return customers.slice(startIndex, endIndex);
+  }, [customers, currentPage]);
+
+  const totalPages = Math.ceil(customers.length / ITEMS_PER_PAGE);
 
 
   if (authLoading) {
@@ -319,7 +338,7 @@ export default function CustomersPage() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              Array.from({ length: 5 }).map((_, index) => (
+              Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
                 <TableRow key={index}>
                   <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                   <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-20" /></TableCell>
@@ -328,8 +347,8 @@ export default function CustomersPage() {
                   <TableCell><Skeleton className="h-8 w-8 rounded-full" /></TableCell>
                 </TableRow>
               ))
-            ) : (
-              customers.map((customer) => (
+            ) : paginatedCustomers.length > 0 ? (
+                paginatedCustomers.map((customer) => (
               <TableRow key={customer.id}>
                 <TableCell className="font-medium">{customer.name}</TableCell>
                 <TableCell className="hidden sm:table-cell capitalize">{customer.role}</TableCell>
@@ -358,10 +377,47 @@ export default function CustomersPage() {
                   )}
                 </TableCell>
               </TableRow>
-            )))}
+            ))
+            ) : (
+                <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                        No se encontraron clientes.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>
+       <CardFooter>
+        <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
+          <div className="flex-1">
+            Mostrando <strong>{Math.min(paginatedCustomers.length, ITEMS_PER_PAGE * currentPage)}</strong> de <strong>{customers.length}</strong> clientes.
+          </div>
+           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Anterior</span>
+            </Button>
+            <span className="font-medium">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+               <span className="hidden sm:inline">Siguiente</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </CardFooter>
     </Card>
 
     {/* Edit Role Dialog */}
@@ -410,7 +466,7 @@ export default function CustomersPage() {
             <AlertDialogDescription>
                 Esta acción no se puede deshacer. Esto eliminará permanentemente al cliente
                 <span className="font-bold"> {deletingCustomer?.name} </span>
-                y todos sus datos asociados del sistema. Ten en cuenta que esto no elimina al usuario del sistema de autenticación de Firebase.
+                y todos sus datos asociados del sistema, incluyendo su cuenta de autenticación.
             </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -424,3 +480,5 @@ export default function CustomersPage() {
     </>
   );
 }
+
+    
