@@ -89,15 +89,18 @@ export async function getInvoices(user: { id: string; role: 'admin' | 'user' }):
     initializeAdminApp();
     const db = getFirestore();
 
-    let invoiceQuery = db.collection('invoices');
+    let invoiceQuery;
 
-    if (user.role !== 'admin') {
-        invoiceQuery = invoiceQuery.where('customerId', '==', user.id);
+    if (user.role === 'admin') {
+      invoiceQuery = db.collection('invoices');
+    } else {
+      invoiceQuery = db.collection('invoices').where('customerId', '==', user.id);
     }
     
     const invoicesSnapshot = await invoiceQuery.get();
     const invoicesData = invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
 
+    // Get customer data only for the invoices fetched
     const customerIds = [...new Set(invoicesData.map(invoice => invoice.customerId))];
     const customersData: Customer[] = [];
 
@@ -106,7 +109,7 @@ export async function getInvoices(user: { id: string; role: 'admin' | 'user' }):
          customersData.push(...customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer)));
     }
     
-    // Add a fallback for deleted customers
+    // Add a fallback for deleted customers, just in case
      invoicesData.forEach(invoice => {
         if (!customersData.find(c => c.id === invoice.customerId)) {
             customersData.push({
@@ -117,7 +120,6 @@ export async function getInvoices(user: { id: string; role: 'admin' | 'user' }):
             });
         }
     });
-
 
     return {
         invoices: invoicesData.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime()),
