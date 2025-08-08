@@ -85,7 +85,7 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <p className="text-sm text-destructive text-center">{error}</p>}
             <div className="grid gap-2">
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Iniciando...' : 'Iniciar Sesión'}

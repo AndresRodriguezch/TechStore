@@ -68,9 +68,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signInWithEmailAndPassword(auth, email, pass);
       return { success: true };
     } catch (error: any) {
+       // Firebase returns 'auth/invalid-credential' for both wrong password and user not found
+       // This is a security best practice to prevent user enumeration.
        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         return { success: false, message: 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.' };
       }
+      // Handle other potential errors
       return { success: false, message: 'Ocurrió un error al iniciar sesión.' };
     }
   };
