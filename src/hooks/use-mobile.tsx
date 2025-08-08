@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react"
@@ -12,7 +13,7 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     
-    // Check on initial mount
+    // Check on initial mount after hydration
     checkDevice()
 
     // Add listener for window resize
