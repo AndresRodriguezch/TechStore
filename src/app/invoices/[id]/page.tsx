@@ -41,7 +41,13 @@ export default function InvoiceDetailPage() {
           if (userSnap.exists()) {
             setCustomer({ id: userSnap.id, ...userSnap.data() } as Customer);
           } else {
-            console.error("No such customer (user)!");
+             // Handle case where customer was deleted
+            setCustomer({
+              id: invoiceData.customerId,
+              name: 'Cliente Eliminado',
+              email: 'No disponible',
+              phone: 'No disponible',
+            });
           }
         } else {
           console.error("No such invoice!");
