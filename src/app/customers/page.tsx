@@ -5,7 +5,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlusCircle, MoreHorizontal, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
-import { doc, updateDoc, setDoc } from "firebase/firestore";
+import { doc, updateDoc, setDoc, getDocs, collection } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 
@@ -23,7 +23,7 @@ import { Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { deleteUser, getCustomers } from "./actions";
+import { deleteUser } from "./actions";
 
 function AccessDenied() {
   return (
@@ -188,13 +188,14 @@ export default function CustomersPage() {
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
     try {
-      const customersData = await getCustomers();
-      setCustomers(customersData);
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const customersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
+        setCustomers(customersData);
     } catch (error) {
       console.error("Error fetching customers: ", error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar los clientes.",
+        description: "No se pudieron cargar los clientes. Revisa los permisos de la base de datos.",
         variant: "destructive"
       });
     } finally {
@@ -250,6 +251,7 @@ export default function CustomersPage() {
     if (!deletingCustomer) return;
 
     try {
+      // Note: This relies on a server-side function to handle deletion securely
       const result = await deleteUser(deletingCustomer.id);
       if (result.success) {
         toast({
@@ -359,7 +361,7 @@ export default function CustomersPage() {
                 <TableCell className="hidden md:table-cell">{customer.email}</TableCell>
                 <TableCell>{customer.phone}</TableCell>
                 <TableCell>
-                  {customer.email !== user.email && (
+                   {customer.email !== user.email && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button aria-haspopup="true" size="icon" variant="ghost">
