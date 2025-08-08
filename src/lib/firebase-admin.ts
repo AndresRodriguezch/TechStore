@@ -1,9 +1,9 @@
 
 'use server';
 
-import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
 import { getApps } from 'firebase-admin/app';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 
 // This function initializes Firebase Admin SDK and ensures it's a singleton.
 function initializeAdminApp() {
@@ -31,17 +31,17 @@ function initializeAdminApp() {
   });
 }
 
-export async function deleteUser(userId: string) {
-  const adminApp = initializeAdminApp();
-  const adminAuth = adminApp.auth();
-  const adminDb = adminApp.firestore();
+export async function deleteUserFromAdmin(userId: string) {
+  initializeAdminApp();
+  const adminAuth = admin.auth();
+  const adminDb = getFirestore();
 
   try {
     // Delete from Firebase Authentication
     await adminAuth.deleteUser(userId);
 
     // Delete from Firestore
-    await deleteDoc(doc(adminDb, 'users', userId));
+    await adminDb.collection('users').doc(userId).delete();
 
     return { success: true };
   } catch (error: any) {
@@ -51,7 +51,7 @@ export async function deleteUser(userId: string) {
       // If user is not in Auth, maybe they are just in Firestore.
       // Try deleting from Firestore anyway.
       try {
-        await deleteDoc(doc(adminDb, "users", userId));
+        await adminDb.collection('users').doc(userId).delete();
         return { success: true, message: "Usuario eliminado solo de la base de datos (no se encontró en autenticación)." };
       } catch (dbError) {
          console.error('Error deleting user from Firestore after Auth delete failed:', dbError);
