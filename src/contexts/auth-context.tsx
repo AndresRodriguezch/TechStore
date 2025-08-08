@@ -78,6 +78,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       await signOut(auth);
+      // Reset user state immediately on logout
+      setUser(null);
       router.push('/');
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
