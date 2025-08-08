@@ -45,7 +45,7 @@ export default function SignupPage() {
       const user = userCredential.user;
 
       // Assign role based on email
-      const userRole = email === 'admin@pi.edu.co' ? 'admin' : 'user';
+      const userRole = email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ? 'admin' : 'user';
 
       // Create a user document in Firestore
       await setDoc(doc(db, "users", user.uid), {
