@@ -11,7 +11,6 @@ async function getCurrentUser() {
     const session = cookies().get('session')?.value;
     if (!session) return null;
     
-    // Ensure admin is initialized
     if (admin.apps.length === 0) {
         const privateKey = process.env.FIREBASE_PRIVATE_KEY;
         if (!privateKey) throw new Error('FIREBASE_PRIVATE_KEY is not set');
@@ -30,6 +29,7 @@ async function getCurrentUser() {
         if (!userDoc.exists) return null;
         return { uid: decodedIdToken.uid, ...userDoc.data() } as Customer;
     } catch (error) {
+        console.error('Error verifying session cookie:', error);
         return null;
     }
 }

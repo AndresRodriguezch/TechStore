@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -30,26 +30,58 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Function to set a session cookie
+async function setSessionCookie(idToken: string) {
+    await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+    });
+}
+
+// Function to clear the session cookie
+async function clearSessionCookie() {
+    await fetch('/api/auth/session', { method: 'DELETE' });
+}
+
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   const fetchUserData = async (firebaseUser: FirebaseUser) => {
-      const userDocRef = doc(db, "users", firebaseUser.uid);
-      const userDocSnap = await getDoc(userDocRef);
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data();
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email!,
-          name: userData.name,
-          role: userData.role,
-          phone: userData.phone,
-          address: userData.address,
-        });
-      } else {
-        setUser({ uid: firebaseUser.uid, email: firebaseUser.email! });
+      try {
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        let userData: User;
+
+        if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            userData = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email!,
+                name: data.name,
+                role: data.role,
+                phone: data.phone,
+                address: data.address,
+            };
+        } else {
+            userData = { uid: firebaseUser.uid, email: firebaseUser.email! };
+        }
+        setUser(userData);
+        
+        // Set session cookie on login
+        const idToken = await firebaseUser.getIdToken();
+        await setSessionCookie(idToken);
+
+        return userData;
+
+      } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
+          return null;
       }
   }
 
@@ -60,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await fetchUserData(firebaseUser);
       } else {
         setUser(null);
+        await clearSessionCookie();
       }
       setLoading(false);
     });
@@ -71,13 +104,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-      // After successful sign-in, onAuthStateChanged will trigger,
-      // but we can also fetch data immediately to ensure state is updated.
       if (userCredential.user) {
-          await fetchUserData(userCredential.user);
+          const fetchedUser = await fetchUserData(userCredential.user);
+          if (fetchedUser) {
+              setLoading(false);
+              return { success: true };
+          }
       }
       setLoading(false);
-      return { success: true };
+      return { success: false, message: 'No se pudieron obtener los datos del usuario.' };
     } catch (error: any) {
        setLoading(false);
        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
@@ -91,7 +126,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await signOut(auth);
       setUser(null);
-      router.push('/login');
+      await clearSessionCookie();
+      // Redirect to login only if not already on a public page
+      if (!['/login', '/signup', '/'].includes(pathname)) {
+        router.push('/login');
+      } else {
+        router.refresh(); // Refresh to reflect logged-out state
+      }
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
