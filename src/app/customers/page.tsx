@@ -14,7 +14,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,7 +22,6 @@ import { Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { deleteUser } from "./actions";
 
 function AccessDenied() {
   return (
@@ -180,11 +178,6 @@ export default function CustomersPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [newRole, setNewRole] = useState<'admin' | 'user'>('user');
 
-  // State for Delete Confirmation Dialog
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
-
-
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
     try {
@@ -219,11 +212,6 @@ export default function CustomersPage() {
     setIsEditDialogOpen(true);
   };
   
-  const handleOpenDeleteDialog = (customer: Customer) => {
-    setDeletingCustomer(customer);
-    setIsDeleteDialogOpen(true);
-  };
-
   const handleRoleChange = async () => {
     if (!editingCustomer) return;
 
@@ -244,38 +232,6 @@ export default function CustomersPage() {
         description: "No se pudo actualizar el rol del cliente.",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleDeleteCustomer = async () => {
-    if (!deletingCustomer) return;
-
-    try {
-      // Note: This relies on a server-side function to handle deletion securely
-      const result = await deleteUser(deletingCustomer.id);
-      if (result.success) {
-        toast({
-          title: "¡Cliente Eliminado!",
-          description: `El cliente ${deletingCustomer.name} ha sido eliminado del sistema.`,
-        });
-        fetchCustomers();
-      } else {
-         toast({
-          title: "Error",
-          description: result.message || "No se pudo eliminar el cliente.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-       console.error("Error deleting customer: ", error);
-       toast({
-        title: "Error",
-        description: "Ocurrió un error inesperado.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleteDialogOpen(false);
-      setDeletingCustomer(null);
     }
   };
 
@@ -375,9 +331,6 @@ export default function CustomersPage() {
                         <DropdownMenuItem asChild>
                             <Link href={`/invoices?customerId=${customer.id}`}>Ver Facturas</Link>
                           </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleOpenDeleteDialog(customer)} className="text-destructive focus:text-destructive">
-                          Eliminar
-                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
@@ -464,25 +417,6 @@ export default function CustomersPage() {
       </DialogContent>
     </Dialog>
     
-     {/* Delete Confirmation Dialog */}
-    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-            <AlertDialogDescription>
-                Esta acción no se puede deshacer. Esto eliminará permanentemente al cliente
-                <span className="font-bold"> {deletingCustomer?.name} </span>
-                y todos sus datos asociados del sistema, incluyendo su cuenta de autenticación.
-            </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteCustomer} className="bg-destructive hover:bg-destructive/90">
-                Sí, eliminar cliente
-            </AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-    </AlertDialog>
     </>
   );
 }
