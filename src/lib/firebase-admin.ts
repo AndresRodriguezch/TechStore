@@ -31,12 +31,11 @@ function initializeAdminApp() {
   });
 }
 
-const adminApp = initializeAdminApp();
-const adminAuth = adminApp.auth();
-const adminDb = adminApp.firestore();
-
-
 export async function deleteUser(userId: string) {
+  const adminApp = initializeAdminApp();
+  const adminAuth = adminApp.auth();
+  const adminDb = adminApp.firestore();
+
   try {
     // Delete from Firebase Authentication
     await adminAuth.deleteUser(userId);
