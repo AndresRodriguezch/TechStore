@@ -4,7 +4,7 @@
 import admin from 'firebase-admin';
 import { getApps, initializeApp, App } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { Customer } from './types';
+import { Customer, Invoice } from './types';
 
 
 function initializeAdminApp(): App {
@@ -28,9 +28,19 @@ function initializeAdminApp(): App {
     throw new Error('Faltan credenciales de la cuenta de servicio de Firebase.');
   }
   
-  return initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+  try {
+    return initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+    });
+  } catch (error) {
+    console.error("Firebase Admin initialization error: ", error);
+    // If it's already initialized, return the existing app.
+    // This can happen in some environments like serverless functions.
+    if (getApps().length) {
+        return getApps()[0]!;
+    }
+    throw error;
+  }
 }
 
 export async function deleteUserFromAdmin(userId: string) {
@@ -73,4 +83,44 @@ export async function getUsers(): Promise<Customer[]> {
         ...doc.data()
     } as Customer));
     return users;
+}
+
+export async function getInvoices(user: { id: string; role: 'admin' | 'user' }): Promise<{ invoices: Invoice[], customers: Customer[] }> {
+    initializeAdminApp();
+    const db = getFirestore();
+
+    let invoiceQuery = db.collection('invoices');
+
+    if (user.role !== 'admin') {
+        invoiceQuery = invoiceQuery.where('customerId', '==', user.id);
+    }
+    
+    const invoicesSnapshot = await invoiceQuery.get();
+    const invoicesData = invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+
+    const customerIds = [...new Set(invoicesData.map(invoice => invoice.customerId))];
+    const customersData: Customer[] = [];
+
+    if (customerIds.length > 0) {
+         const customersSnapshot = await db.collection('users').where(admin.firestore.FieldPath.documentId(), 'in', customerIds).get();
+         customersData.push(...customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer)));
+    }
+    
+    // Add a fallback for deleted customers
+     invoicesData.forEach(invoice => {
+        if (!customersData.find(c => c.id === invoice.customerId)) {
+            customersData.push({
+                id: invoice.customerId,
+                name: 'Cliente Eliminado',
+                email: 'No disponible',
+                phone: 'No disponible',
+            });
+        }
+    });
+
+
+    return {
+        invoices: invoicesData.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime()),
+        customers: customersData
+    };
 }

@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { MoreHorizontal, ListFilter } from "lucide-react";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 
 import {
   Card,
@@ -50,6 +50,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { getInvoices } from "./actions";
 
 export default function InvoicesPage() {
   const searchParams = useSearchParams();
@@ -58,22 +59,18 @@ export default function InvoicesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [users, setUsers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null);
 
   const fetchData = useCallback(async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const [invoicesSnapshot, usersSnapshot] = await Promise.all([
-        getDocs(collection(db, "invoices")),
-        getDocs(collection(db, "users")),
-      ]);
-      const invoicesData = invoicesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Invoice));
-      const usersData = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
-      setInvoices(invoicesData.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime()));
-      setUsers(usersData);
+      const { invoices, customers } = await getInvoices({ id: user.uid, role: user.role || 'user' });
+      setInvoices(invoices);
+      setCustomers(customers);
     } catch (error) {
       console.error("Error fetching data: ", error);
        toast({
@@ -84,14 +81,14 @@ export default function InvoicesPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [user, toast]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   const getUserById = (id: string) => {
-    return users.find((user) => user.id === id);
+    return customers.find((customer) => customer.id === id);
   }
   
   const handleMarkAsPaid = async (invoiceId: string) => {
@@ -151,7 +148,7 @@ export default function InvoicesPage() {
   const customerName = useMemo(() => {
     if (!customerId) return null;
     return getUserById(customerId)?.name;
-  }, [users, customerId]);
+  }, [customers, customerId]);
 
   return (
     <>
@@ -164,7 +161,7 @@ export default function InvoicesPage() {
                {customerName ? `Un resumen de todas las facturas de ${customerName}.` : 'Gestiona tus facturas y sigue su estado.'}
             </CardDescription>
           </div>
-           {customerId && (
+           {customerId && user?.role === 'admin' && (
             <Button asChild variant="outline" className="w-full sm:w-auto">
               <Link href="/invoices">
                 <ListFilter className="mr-2 h-4 w-4" /> Ver Todas las Facturas
@@ -257,7 +254,7 @@ export default function InvoicesPage() {
                 <TableHeader>
                     <TableRow>
                     <TableHead>Factura #</TableHead>
-                    <TableHead>Cliente</TableHead>
+                    {user?.role === 'admin' && <TableHead>Cliente</TableHead>}
                     <TableHead>Fecha de Vencimiento</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Monto</TableHead>
@@ -271,7 +268,7 @@ export default function InvoicesPage() {
                     Array.from({ length: 5 }).map((_, index) => (
                         <TableRow key={index}>
                             <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                            {user?.role === 'admin' && <TableCell><Skeleton className="h-5 w-24" /></TableCell>}
                             <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                             <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
                             <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
@@ -292,7 +289,7 @@ export default function InvoicesPage() {
                                 {invoice.invoiceNumber}
                             </Link>
                             </TableCell>
-                            <TableCell>{customer?.name}</TableCell>
+                            {user?.role === 'admin' && <TableCell>{customer?.name}</TableCell>}
                             <TableCell>
                             {format(new Date(invoice.dueDate), "PPP", { locale: es })}
                             </TableCell>
@@ -331,7 +328,7 @@ export default function InvoicesPage() {
                     })
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={6} className="text-center h-24">
+                            <TableCell colSpan={user?.role === 'admin' ? 6 : 5} className="text-center h-24">
                                 No se encontraron facturas.
                             </TableCell>
                         </TableRow>
@@ -363,5 +360,3 @@ export default function InvoicesPage() {
     </>
   );
 }
-
-    
