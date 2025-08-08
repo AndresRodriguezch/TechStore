@@ -3,8 +3,9 @@ import { auth } from 'firebase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import admin from 'firebase-admin';
 
-// Initialize Firebase Admin SDK
-if (!admin.apps.length) {
+// Function to initialize Firebase Admin SDK (ensures it's only initialized once)
+const initializeAdminApp = () => {
+  if (!admin.apps.length) {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
     if (!privateKey) {
         throw new Error('FIREBASE_PRIVATE_KEY is not set');
@@ -16,10 +17,13 @@ if (!admin.apps.length) {
             privateKey: privateKey.replace(/\\n/g, '\n'),
         }),
     });
-}
+  }
+  return admin.app();
+};
 
 
 export async function POST(request: NextRequest) {
+  initializeAdminApp(); // Ensure app is initialized
   const { idToken } = await request.json();
 
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
@@ -39,12 +43,14 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
+    console.error('Session cookie creation error:', error);
     return NextResponse.json({ status: 'error', message: 'Failed to create session' }, { status: 401 });
   }
 }
 
 
 export async function DELETE(request: NextRequest) {
+  initializeAdminApp(); // Ensure app is initialized
   const response = NextResponse.json({ status: 'success' }, { status: 200 });
   response.cookies.set({
     name: 'session',
