@@ -119,7 +119,7 @@ export default function InvoiceDetailPage() {
               </div>
               <div className="text-left md:text-right w-full md:w-auto">
                 <div className="flex items-center md:justify-end gap-2 text-xl font-semibold">
-                  <Gem className="h-6 w-6 text-primary" /> E-commerce Inc.
+                  <Gem className="h-6 w-6 text-primary" /> TechStore
                 </div>
                 <p className="text-sm text-muted-foreground">123 Business Rd, Suite 456</p>
                 <p className="text-sm text-muted-foreground">Commerce City, ST 78910</p>
