@@ -2,17 +2,21 @@
 'use server';
 
 import admin from 'firebase-admin';
-import { getApps, initializeApp, App, getApp } from 'firebase-admin/app';
-import { getFirestore, Firestore } from 'firebase-admin/firestore';
-import { Customer } from './types';
+import type { App } from 'firebase-admin/app';
+import type { Firestore } from 'firebase-admin/firestore';
+import type { Customer } from './types';
 
-let adminApp: App;
-let firestoreDb: Firestore;
+let adminApp: App | undefined;
+let firestoreDb: Firestore | undefined;
 
 function initializeAdminApp() {
-    if (getApps().length > 0) {
-        adminApp = getApp();
-        firestoreDb = getFirestore(adminApp);
+    if (admin.apps.length > 0) {
+        if (!adminApp) {
+            adminApp = admin.app();
+        }
+        if(!firestoreDb) {
+            firestoreDb = admin.firestore();
+        }
         return;
     }
 
@@ -32,37 +36,36 @@ function initializeAdminApp() {
     }
 
     try {
-        adminApp = initializeApp({
+        adminApp = admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
         });
-        firestoreDb = getFirestore(adminApp);
+        firestoreDb = admin.firestore(adminApp);
     } catch (error: any) {
-        // This might happen in some environments, but getApps().length should prevent it.
         if (error.code === 'auth/invalid-credential') {
-            console.error('Firebase Admin initialization error: Invalid credentials.', error);
+            console.error('Error de inicialización de Firebase Admin: Credenciales inválidas.', error);
             throw new Error('Las credenciales de Firebase Admin son inválidas. Revisa las variables de entorno.');
         }
-        console.error("Firebase Admin initialization error: ", error);
+        console.error("Error de inicialización de Firebase Admin: ", error);
         throw error;
     }
 }
 
 async function deleteUserFromAdmin(userId: string) {
-    initializeAdminApp(); // Ensure app is initialized
+    initializeAdminApp();
     const adminAuth = admin.auth(adminApp);
 
     try {
         await adminAuth.deleteUser(userId);
-        await firestoreDb.collection('users').doc(userId).delete();
+        await firestoreDb!.collection('users').doc(userId).delete();
         return { success: true };
     } catch (error: any) {
-        console.error('Error deleting user:', error);
+        console.error('Error al eliminar usuario:', error);
         if (error.code === 'auth/user-not-found') {
             try {
-                await firestoreDb.collection('users').doc(userId).delete();
+                await firestoreDb!.collection('users').doc(userId).delete();
                 return { success: true, message: "Usuario eliminado solo de la base de datos (no se encontró en autenticación)." };
             } catch (dbError) {
-                console.error('Error deleting user from Firestore after Auth delete failed:', dbError);
+                console.error('Error al eliminar usuario de Firestore después de fallo de Auth:', dbError);
                 return { success: false, message: 'El usuario no se encontró en autenticación y tampoco pudo ser eliminado de la base de datos.' };
             }
         }
@@ -71,8 +74,8 @@ async function deleteUserFromAdmin(userId: string) {
 }
 
 async function getUsers(): Promise<Customer[]> {
-    initializeAdminApp(); // Ensure app is initialized
-    const usersSnapshot = await firestoreDb.collection('users').get();
+    initializeAdminApp();
+    const usersSnapshot = await firestoreDb!.collection('users').get();
     const users = usersSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
