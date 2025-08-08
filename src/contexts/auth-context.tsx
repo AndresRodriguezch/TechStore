@@ -35,25 +35,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const fetchUserAndSetData = async (firebaseUser: FirebaseUser) => {
+    const userDocRef = doc(db, "users", firebaseUser.uid);
+    const userDocSnap = await getDoc(userDocRef);
+    let userData: Partial<User> = {};
+
+    if (userDocSnap.exists()) {
+      userData = userDocSnap.data();
+    }
+    
+    // Dynamically check for admin role based on .env variable
+    const isAdmin = firebaseUser.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+    const finalRole = isAdmin ? 'admin' : userData.role || 'user';
+
+    setUser({
+      uid: firebaseUser.uid,
+      email: firebaseUser.email!,
+      name: userData.name,
+      phone: userData.phone,
+      address: userData.address,
+      role: finalRole,
+    });
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email!,
-            name: userData.name,
-            role: userData.role,
-            phone: userData.phone,
-            address: userData.address,
-          });
-        } else {
-          // If user exists in Auth but not in Firestore, handle it
-          setUser({ uid: firebaseUser.uid, email: firebaseUser.email! });
-        }
+        await fetchUserAndSetData(firebaseUser);
       } else {
         setUser(null);
       }
@@ -66,6 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, pass: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, pass);
+      // After successful sign-in, onAuthStateChanged will trigger and fetch user data.
       return { success: true };
     } catch (error: any) {
        // Firebase returns 'auth/invalid-credential' for both wrong password and user not found
