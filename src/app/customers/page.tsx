@@ -1,11 +1,11 @@
 
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlusCircle, MoreHorizontal, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
-import { collection, getDocs, doc, updateDoc, setDoc } from "firebase/firestore";
+import { doc, updateDoc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 
@@ -23,7 +23,7 @@ import { Customer } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
-import { deleteUser } from "./actions";
+import { deleteUser, getCustomers } from "./actions";
 
 function AccessDenied() {
   return (
@@ -185,18 +185,22 @@ export default function CustomersPage() {
   const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
 
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     setLoading(true);
     try {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      const customersData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Customer));
+      const customersData = await getCustomers();
       setCustomers(customersData);
     } catch (error) {
       console.error("Error fetching customers: ", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar los clientes.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     if (!authLoading && user?.role !== 'admin') {
@@ -206,7 +210,7 @@ export default function CustomersPage() {
     if (user) {
       fetchCustomers();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, fetchCustomers]);
 
   const handleOpenEditDialog = (customer: Customer) => {
     setEditingCustomer(customer);

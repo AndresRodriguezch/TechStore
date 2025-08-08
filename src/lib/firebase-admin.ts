@@ -2,13 +2,15 @@
 'use server';
 
 import admin from 'firebase-admin';
-import { getApps } from 'firebase-admin/app';
+import { getApps, initializeApp, App } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { Customer } from './types';
 
-// This function initializes Firebase Admin SDK and ensures it's a singleton.
-function initializeAdminApp() {
-  if (getApps().length > 0) {
-    return admin.app();
+
+function initializeAdminApp(): App {
+  const apps = getApps();
+  if (apps.length > 0) {
+    return apps[0]!;
   }
 
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
@@ -26,7 +28,7 @@ function initializeAdminApp() {
     throw new Error('Faltan credenciales de la cuenta de servicio de Firebase.');
   }
   
-  return admin.initializeApp({
+  return initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
 }
@@ -60,4 +62,15 @@ export async function deleteUserFromAdmin(userId: string) {
     }
     return { success: false, message: error.message || 'Ocurrió un error al eliminar el usuario.' };
   }
+}
+
+export async function getUsers(): Promise<Customer[]> {
+    initializeAdminApp();
+    const adminDb = getFirestore();
+    const usersSnapshot = await adminDb.collection('users').get();
+    const users = usersSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    } as Customer));
+    return users;
 }
