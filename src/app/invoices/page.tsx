@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { MoreHorizontal, ListFilter } from "lucide-react";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 
 import {
   Card,
@@ -50,7 +50,48 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { getInvoices } from "./actions";
+
+// This admin-only function will be part of the component now
+async function getAllInvoicesAndCustomers(): Promise<{ invoices: Invoice[], customers: Customer[] }> {
+  const invoicesSnapshot = await getDocs(collection(db, "invoices"));
+  const invoicesData = invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+
+  const customerIds = [...new Set(invoicesData.map(invoice => invoice.customerId))];
+  const customersData: Customer[] = [];
+
+  if (customerIds.length > 0) {
+    const customersSnapshot = await getDocs(collection(db, 'users'));
+    customersSnapshot.forEach(doc => {
+      if (customerIds.includes(doc.id)) {
+        customersData.push({ id: doc.id, ...doc.data() } as Customer);
+      }
+    });
+  }
+  
+  invoicesData.forEach(invoice => {
+    if (!customersData.find(c => c.id === invoice.customerId)) {
+      customersData.push({
+        id: invoice.customerId,
+        name: 'Cliente Eliminado',
+        email: 'No disponible',
+        phone: 'No disponible',
+      });
+    }
+  });
+
+  return {
+    invoices: invoicesData.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime()),
+    customers: customersData
+  };
+}
+
+async function getUserInvoices(userId: string): Promise<Invoice[]> {
+  const q = query(collection(db, "invoices"), where("customerId", "==", userId));
+  const querySnapshot = await getDocs(q);
+  const invoicesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+  return invoicesData.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime());
+}
+
 
 export default function InvoicesPage() {
   const searchParams = useSearchParams();
@@ -59,7 +100,7 @@ export default function InvoicesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<Record<string, Customer>>({});
   const [loading, setLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null);
@@ -68,9 +109,19 @@ export default function InvoicesPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const { invoices, customers } = await getInvoices({ id: user.uid, role: user.role || 'user' });
-      setInvoices(invoices);
-      setCustomers(customers);
+      if (user.role === 'admin') {
+        const { invoices, customers } = await getAllInvoicesAndCustomers();
+        setInvoices(invoices);
+        setCustomers(customers.reduce((acc, customer) => {
+          acc[customer.id] = customer;
+          return acc;
+        }, {} as Record<string, Customer>));
+
+      } else {
+        const userInvoices = await getUserInvoices(user.uid);
+        setInvoices(userInvoices);
+        setCustomers({ [user.uid]: user as Customer });
+      }
     } catch (error) {
       console.error("Error fetching data: ", error);
        toast({
@@ -88,7 +139,7 @@ export default function InvoicesPage() {
   }, [fetchData]);
 
   const getUserById = (id: string) => {
-    return customers.find((customer) => customer.id === id);
+    return customers[id] || null;
   }
   
   const handleMarkAsPaid = async (invoiceId: string) => {
@@ -141,9 +192,9 @@ export default function InvoicesPage() {
 
 
   const filteredInvoices = useMemo(() => {
-    if (!customerId) return invoices;
+    if (!customerId || user?.role !== 'admin') return invoices;
     return invoices.filter(invoice => invoice.customerId === customerId);
-  }, [invoices, customerId]);
+  }, [invoices, customerId, user]);
   
   const customerName = useMemo(() => {
     if (!customerId) return null;
@@ -156,7 +207,7 @@ export default function InvoicesPage() {
       <CardHeader className="p-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <CardTitle>{customerName ? `Facturas de ${customerName}` : 'Facturas'}</CardTitle>
+            <CardTitle>{customerName ? `Facturas de ${customerName}` : 'Mis Facturas'}</CardTitle>
             <CardDescription className="mt-2">
                {customerName ? `Un resumen de todas las facturas de ${customerName}.` : 'Gestiona tus facturas y sigue su estado.'}
             </CardDescription>
@@ -196,7 +247,7 @@ export default function InvoicesPage() {
                              <Link href={`/invoices/${invoice.id}`} className="font-semibold hover:underline">
                                 {invoice.invoiceNumber}
                              </Link>
-                             <p className="text-sm text-muted-foreground">{customer?.name}</p>
+                             {user?.role === 'admin' && <p className="text-sm text-muted-foreground">{customer?.name}</p>}
                            </div>
                            <InvoiceStatusBadge status={invoice.status} />
                         </div>
