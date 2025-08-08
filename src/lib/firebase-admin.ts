@@ -147,11 +147,13 @@ export async function getInvoiceById(invoiceId: string, user: User): Promise<{ i
     if (customerSnap.exists()) {
         customerData = { id: customerSnap.id, ...customerSnap.data() } as Customer;
     } else {
+        // If customer doesn't exist, create a placeholder
         customerData = {
             id: invoiceData.customerId,
             name: 'Cliente Eliminado',
             email: 'No disponible',
             phone: 'No disponible',
+            role: 'user'
         };
     }
 

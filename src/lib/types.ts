@@ -41,3 +41,19 @@ export interface Product {
   category: string;
   stock: number;
 }
+
+
+// This is the type for the user object in the AuthContext, 
+// which might have more properties than the basic customer type.
+export interface User {
+  uid: string;
+  email: string;
+  name?: string;
+  role?: 'admin' | 'user';
+  phone?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    country?: string;
+  };
+}
