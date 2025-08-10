@@ -317,7 +317,7 @@ export default function CustomersPage() {
                 <TableCell className="hidden md:table-cell">{customer.email}</TableCell>
                 <TableCell>{customer.phone}</TableCell>
                 <TableCell>
-                   {customer.email !== user.email && (
+                   {customer.email !== 'andres.rodriguez@pi.edu.co' && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button aria-haspopup="true" size="icon" variant="ghost">
