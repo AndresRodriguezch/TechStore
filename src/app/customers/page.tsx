@@ -39,127 +39,6 @@ function AccessDenied() {
   )
 }
 
-// Component for the Add Customer Form
-const AddCustomerForm = ({ onCustomerAdded, closeDialog }: { onCustomerAdded: () => void, closeDialog: () => void }) => {
-  const { toast } = useToast();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [country, setCountry] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleAddCustomer = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // Create user in Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Create user document in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        name: name,
-        email: email,
-        phone: phone,
-        address: {
-          street: address,
-          city: city,
-          country: country,
-        },
-        role: 'user' // New customers are always 'user'
-      });
-      
-      toast({
-        title: "¡Cliente Añadido!",
-        description: "El nuevo cliente ha sido creado exitosamente.",
-      });
-
-      onCustomerAdded(); // Refresh customer list
-      closeDialog(); // Close the dialog
-
-    } catch (error: any) {
-      console.error(error);
-      if (error.code === 'auth/email-already-in-use') {
-        setError('Este correo electrónico ya está en uso.');
-      } else {
-        setError('Ocurrió un error al crear el cliente.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleAddCustomer}>
-      <div className="grid gap-4 py-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="name" className="text-right">Nombre</Label>
-          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="col-span-3" />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="email" className="text-right">Correo</Label>
-          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="col-span-3" />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="password" className="text-right">Contraseña</Label>
-            <div className="relative col-span-3">
-                <Input 
-                id="password" 
-                type={showPassword ? 'text' : 'password'} 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required 
-                className="pr-10"
-                />
-                <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
-                >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-            </div>
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="phone" className="text-right">Teléfono</Label>
-          <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required className="col-span-3" />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="address" className="text-right">Dirección</Label>
-          <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required className="col-span-3" />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="city" className="text-right">Ciudad</Label>
-          <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} required className="col-span-3" />
-        </div>
-         <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="country" className="text-right">País</Label>
-          <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} required className="col-span-3" />
-        </div>
-         {error && <p className="col-span-4 text-sm text-center text-destructive">{error}</p>}
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={closeDialog} type="button">Cancelar</Button>
-        <Button type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar Cliente'}</Button>
-      </DialogFooter>
-    </form>
-  )
-}
-
-
 export default function CustomersPage() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -169,9 +48,6 @@ export default function CustomersPage() {
   
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
-
-  // State for Add Customer Dialog
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   // State for Edit Role Dialog
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -263,26 +139,6 @@ export default function CustomersPage() {
               Gestiona tus clientes y mira sus detalles.
             </CardDescription>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-1">
-                <PlusCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Añadir Cliente</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Añadir Nuevo Cliente</DialogTitle>
-                <DialogDescription>
-                  Rellena los detalles a continuación para crear un nuevo perfil de cliente.
-                </DialogDescription>
-              </DialogHeader>
-              <AddCustomerForm 
-                onCustomerAdded={fetchCustomers}
-                closeDialog={() => setIsAddDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
         </div>
       </CardHeader>
       <CardContent>
